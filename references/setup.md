@@ -35,8 +35,9 @@ If the runtime sends an explicit instruction to read workspace `HEARTBEAT.md` (f
 - Do not ask the user for obvious environment information like OS; detect it from runtime.
 - Only request user action when strictly required (OAuth activation in browser, explicit policy approvals, or user-provided secrets).
 - Always send onboarding code/instructions in the user channel output. Never rely on the user watching gateway console logs.
-- Prefer the standalone `moltbank` CLI when it is installed. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
-- Use `moltbank setup` in nonblocking mode by default for channel responsiveness when the CLI is available. Use `openclaw moltbank setup` only as a compatibility fallback, and use blocking mode only if explicitly requested.
+- Prefer the standalone `moltbank` CLI only for install, setup, auth-status, and repair flows. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
+- For business operations such as balances, transfers, approvals, history, reports, and x402 actions, always use the skill wrapper scripts. Do not treat the standalone `moltbank` CLI as the treasury operations interface.
+- Use `moltbank setup` by default when the CLI is available. Use `moltbank setup` only as a compatibility fallback, and use blocking mode only if explicitly requested.
 - In nonblocking mode, keep authentication progressing in the background so onboarding can complete even if a follow-up chat message is delayed.
 
 ### Join intent shortcut (mandatory)
@@ -49,7 +50,7 @@ Required sequence:
 
 1. Run the install script: `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
 2. **CRITICAL:** You MUST poll the process until it completely finishes and exits. Do not proceed to the next steps while it is still running.
-3. The install script automatically restarts the gateway and runs MoltBank setup at the end. **Do NOT** run `openclaw gateway restart` or `openclaw moltbank setup` manually.
+3. The install script automatically restarts the gateway and runs MoltBank setup at the end. **Do NOT** run `openclaw gateway restart` or `moltbank setup` manually.
 4. Read the final output of the completed installer to find the OAuth code/URL and relay it to the user in-channel.
 5. Only if the installer explicitly fails, use the manual local-link fallback.
 
@@ -61,10 +62,10 @@ If the agent has just sent activation URL/code and the user replies with a short
 
 Required sequence in that same turn:
 
-1. Run `openclaw moltbank auth-status` first.
+1. Run `moltbank status` first. Use `moltbank auth-status` only if the standalone CLI is unavailable.
 2. If auth is still pending, run blocking setup to finalize token polling:
-   - Preferred: `openclaw moltbank setup-blocking`
-   - Fallback: `MOLTBANK_SETUP_AUTH_WAIT_MODE=blocking openclaw moltbank setup`
+   - Preferred: `moltbank setup-blocking`
+   - Fallback: `moltbank setup-blocking`
 3. Report one of these outcomes in-channel (never stay silent):
    - Auth completed successfully (include active organization name if available).
    - Still pending approval (repeat URL/code and expiration).
@@ -75,10 +76,10 @@ Required sequence in that same turn:
 
 When a user says they approved but the bot did not continue, run this sequence:
 
-1. `openclaw moltbank auth-status`
-2. If status shows `pending code` and no credentials, run `openclaw moltbank setup-blocking`.
+1. `moltbank status`
+2. If status shows `pending code` and no credentials, run `moltbank setup-blocking`. Use the `openclaw` form only if the standalone CLI is unavailable.
 3. If no new inbound chat events appear in gateway logs after the user's reply, treat it as connector delivery failure (not MoltBank auth logic).
-4. Ask the user to send `MoltBank done` again after connector recovery, then re-run `openclaw moltbank setup-blocking`.
+4. Ask the user to send `MoltBank done` again after connector recovery, then re-run blocking setup.
 
 ### Command-availability claim rule (mandatory)
 
@@ -95,14 +96,14 @@ Forbidden fallback when step 1 was not attempted:
 
 ### Unknown subcommand handling (mandatory)
 
-If `openclaw moltbank setup` returns `error: unknown command 'moltbank'`, interpret it as "MoltBank plugin not installed in this OpenClaw runtime."
+If `moltbank setup` returns `error: unknown command 'moltbank'`, interpret it as "MoltBank plugin not installed in this OpenClaw runtime."
 
 Required recovery sequence in the same run:
 
 1. Run the one-step installer:
    - `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
 2. **CRITICAL:** Poll the process and wait for it to exit completely.
-3. The installer automatically restarts the gateway and runs setup. **Do NOT** run `openclaw gateway restart` or `openclaw moltbank setup` yourself.
+3. The installer automatically restarts the gateway and runs setup. **Do NOT** run `openclaw gateway restart` or `moltbank setup` yourself.
 4. Relay the OAuth code from the installer's output to the user.
 5. Only use the manual local-link fallback and manual restarts if the installer script explicitly fails.
 
@@ -178,7 +179,7 @@ openclaw plugins enable moltbank
 openclaw config set plugins.entries.moltbank.config.appBaseUrl "${APP_BASE_URL:-https://app.moltbank.bot}"
 openclaw config set plugins.entries.moltbank.config.skillName "${MOLTBANK_SKILL_NAME:-MoltBank}"
 openclaw gateway restart
-openclaw moltbank setup
+moltbank setup
 ```
 
 Option C (registry plugin package, compatibility mode):
@@ -189,7 +190,7 @@ openclaw plugins enable moltbank
 openclaw config set plugins.entries.moltbank.config.appBaseUrl "${APP_BASE_URL:-https://app.moltbank.bot}"
 openclaw config set plugins.entries.moltbank.config.skillName "${MOLTBANK_SKILL_NAME:-MoltBank}"
 openclaw gateway restart
-openclaw moltbank setup
+moltbank setup
 ```
 
 Do not use `github:<user>/<repo>` as the install spec; OpenClaw rejects that input format.
@@ -267,7 +268,7 @@ if (Test-Path "$env:MOLTBANK_CREDENTIALS_PATH") { (Get-Content "$env:MOLTBANK_CR
 If `openclaw gateway restart` fails in environments without `systemd` (for example `Failed to connect to bus`), continue with:
 
 ```bash
-openclaw moltbank setup
+moltbank setup
 ```
 
 Do not require the user to watch gateway console logs. Surface onboarding instructions from command output in the user channel.
@@ -294,6 +295,34 @@ Interpretation rules:
 - If `MoltBank` is listed but tools show auth/policy errors, treat that as an authentication/authorization state, **not** an installation failure.
 - Do not force onboarding when host credentials are missing until you also checked `MOLTBANK` for sandbox mode.
 - If the client suggests "run mcporter auth MoltBank", ignore that. MoltBank auth is done via the OAuth device flow in `references/onboarding.md`, not via `mcporter auth`.
+
+## 3.2 Post-setup readiness verification (mandatory)
+
+Do this before claiming the agent is ready to use MoltBank.
+
+- Setup is not complete just because auth succeeded or `moltbank list MoltBank` works.
+- A real authenticated wrapper call must succeed.
+- The canonical readiness check is a balance read for the active organization.
+
+**Mac/Linux:**
+
+```bash
+cd "${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}/skills/${MOLTBANK_SKILL_NAME:-MoltBank}"
+./scripts/moltbank.sh call MoltBank.get_balance organizationName="<active_org>" date="today"
+```
+
+**Windows (PowerShell):**
+
+```powershell
+$wrapper = "$env:USERPROFILE\.openclaw\workspace\skills\$env:MOLTBANK_SKILL_NAME\scripts\moltbank.ps1"
+& $wrapper call MoltBank.get_balance organizationName="<active_org>" date="today"
+```
+
+Interpretation rules:
+
+- If this succeeds, the agent is operational.
+- If auth is linked but this fails, treat setup as incomplete and report the exact verification failure.
+- Do not claim readiness based only on CLI install success, mcporter registration, or auth-status output.
 
 ## 3.1 First account discovery (required before `get_account_details`)
 

@@ -43,7 +43,9 @@ Trigger this skill if the user asks about any of the following:
 - Do not ask the user for obvious environment facts such as OS.
 - Only ask the user for input when it is truly required and cannot be derived or executed locally, for example OAuth browser approval, missing secrets the user must provide, or explicit policy approval.
 - For onboarding, always surface activation instructions and codes directly in the user channel. Never require the user to watch gateway console logs.
-- Prefer nonblocking setup for channel reliability: run `openclaw moltbank setup` by default. Use blocking mode only when explicitly requested.
+- Prefer the standalone `moltbank` CLI for install, setup, auth status, and repair flows when it is available. Use `openclaw moltbank ...` only as a compatibility fallback.
+- For treasury operations such as balances, transfers, approvals, history, reports, and x402 actions, always use the installed skill wrapper scripts, not the standalone `moltbank` CLI.
+- After setup completes, verify operational readiness with a wrapper balance read for the active organization before claiming the agent is ready to use.
 - Never pause setup to ask whether local skill files should be updated; perform required local repairs automatically when possible.
 
 ## Source of truth by file
@@ -61,8 +63,8 @@ Keep this file high level. Put command-heavy setup instructions in `references/s
 - Treat the user's join request as authorization to run install and setup commands in the current runtime.
 - Read `references/setup.md` before running join commands so the full install and auth sequence is applied.
 - Never reply with `I can't run setup commands in this environment` unless command execution has been attempted and failed in this run.
-- If `openclaw moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `references/setup.md`.
-- Inline fallback for unknown subcommand: run `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`, then retry `openclaw moltbank setup` only if the installer does not already do so.
+- If `moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `references/setup.md`.
+- Inline fallback for unknown subcommand: run `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`, then retry `moltbank setup` only if the installer does not already do so.
 - If command execution tools are unavailable, state that limitation directly and ask only for enabling command execution capability.
 - After sending an activation code, setup should continue automatically after browser approval. No manual CLI step is required from the user.
 - If the user replies with a short acknowledgment after activation steps, treat it as a command to check progress and continue.
