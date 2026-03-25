@@ -1,6 +1,6 @@
 ---
 name: moltbank
-description: MCP skill for MoltBank banking workflows, approvals, allowances, Earn, and x402.
+description: MCP skill for MoltBank stablecoin treasury workflows, approvals, allowances, Earn, and x402.
 metadata:
   category: finance
   version: 1.5.4
@@ -21,7 +21,7 @@ metadata:
 
 # MoltBank skill for AI agents
 
-Use this skill whenever the user asks to do business banking actions through MoltBank.
+Use this skill whenever the user asks to do stablecoin treasury actions through MoltBank.
 
 ## Trigger conditions
 
@@ -30,7 +30,7 @@ Trigger this skill if the user asks about any of the following:
 - MoltBank or app.moltbank.bot
 - treasury balances, USDC holdings, accounts, or cash flow
 - payment proposals, approvals, transfers, recipients, transaction history
-- onboarding, team invites, or KYB/KYC status
+- onboarding or team invites
 - Earn or Aave actions
 - OpenClaw bot allowances
 - x402 setup, funding, gas top-up, or paid x402 requests

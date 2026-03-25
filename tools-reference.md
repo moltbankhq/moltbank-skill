@@ -53,15 +53,6 @@ Description: get USDC balance for one or all accounts in an organization for a s
 | `accountName` | No | string | If omitted, returns all accounts. |
 | `timezone` | No | string | IANA timezone. If omitted, UTC is used. |
 
-#### `get_bank_details`
-
-Description: get US bank account details for depositing funds.
-
-| Input | Required | Type | Validation / description |
-| :---- | :------- | :--- | :----------------------- |
-| `organizationName` | Yes | string | Name of the organization. |
-| `accountName` | Yes | string | Name of the account. |
-
 #### `get_account_details`
 
 Description: get details for a specific account, including Safe address, owners, and threshold.
@@ -179,7 +170,7 @@ Description: analyze executed outgoing spend over a date range and return rule-b
 Behavior:
 
 - Focuses on executed outgoing spend only.
-- Excludes inbound deposits and pending proposals.
+- Excludes inbound receipts and pending proposals.
 - Returns weekly, monthly, and yearly projections, recurring-recipient cadence signals, estimated fee overhead, and before or after comparisons when filters are supplied.
 
 #### `list_recent_transactions`
@@ -318,17 +309,6 @@ Description: resolve a name or wallet address to determine whether it is an inte
 | `organizationName` | Yes | string | Organization. |
 | `identifier` | Yes | string | Email address or username of the invitee. |
 | `type` | Yes | enum | `email` or `username`. |
-
-#### `get_verification_status`
-
-Description: check KYB status for an organization.
-
-| Input | Required | Type | Validation / description |
-| :---- | :------- | :--- | :----------------------- |
-| `scope` | Yes | enum | Must be `organization` for agent workflows. |
-| `organizationName` | Yes | string | Organization name. |
-
----
 
 ### Earn (Aave)
 

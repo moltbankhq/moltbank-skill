@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "MoltBank": {
-      "description": "MoltBank stablecoin banking MCP server powered by Fondu",
+      "description": "MoltBank stablecoin treasury MCP server powered by Fondu",
       "transport": "sse",
       "url": "${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp",
       "headers": {
