@@ -9,11 +9,11 @@ trap 'echo "[install.sh] ERROR line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
 RAW_BASE_URL="${APP_BASE_URL:-${FONDU_SKILL_BASE_URL:-${FONDU_BASE_URL:-https://app.moltbank.bot}}}"
 SKILL_NAME="${MOLTBANK_SKILL_NAME:-${OPENCLAW_SKILL_NAME:-MoltBank}}"
 PLUGIN_ID="${MOLTBANK_PLUGIN_ID:-moltbank}"
-PLUGIN_SPEC="${MOLTBANK_PLUGIN_SPEC:-${OPENCLAW_PLUGIN_SPEC:-@moltbank/moltbank}}"
+PLUGIN_SPEC="${MOLTBANK_PLUGIN_SPEC:-${OPENCLAW_PLUGIN_SPEC:-@moltbankhq/openclaw}}"
 PLUGIN_LOCAL_PATH="${MOLTBANK_PLUGIN_LOCAL_PATH:-}"
 PLUGIN_INSTALL_MODE="${MOLTBANK_PLUGIN_INSTALL_MODE:-link}" # link|copy
-PLUGIN_GIT_URL="${MOLTBANK_PLUGIN_GIT_URL:-https://github.com/CapuzR/moltbank-npm.git}"
-PLUGIN_CLONE_DIR="${MOLTBANK_PLUGIN_CLONE_DIR:-./moltbank-npm}"
+PLUGIN_GIT_URL="${MOLTBANK_PLUGIN_GIT_URL:-https://github.com/moltbankhq/openclaw-plugin.git}"
+PLUGIN_CLONE_DIR="${MOLTBANK_PLUGIN_CLONE_DIR:-./openclaw-plugin}"
 
 LAST_INSTALL_OUTPUT=""
 
@@ -73,7 +73,7 @@ resolve_local_plugin_path() {
     return
   fi
 
-  for candidate in ./moltbank-npm ./moltbank-npm-main; do
+  for candidate in ./openclaw ./openclaw-plugin; do
     if [ -d "$candidate" ]; then
       echo "$candidate"
       return
@@ -340,8 +340,8 @@ if [ -z "$install_source" ]; then
   log_error "Failed to install MoltBank plugin from supported sources."
   log_error "OpenClaw only accepts registry packages, local paths, or local archives for plugin install."
   log_error "Try one of these:"
-  log_error "  1) openclaw plugins install @moltbank/moltbank"
-  log_error "  2) git clone https://github.com/CapuzR/moltbank-npm.git && openclaw plugins install -l ./moltbank-npm"
+  log_error "  1) openclaw plugins install @moltbankhq/openclaw"
+  log_error "  2) git clone https://github.com/moltbankhq/openclaw-plugin.git && openclaw plugins install -l ./openclaw-plugin"
   exit 1
 fi
 

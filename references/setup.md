@@ -158,8 +158,8 @@ curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash
 Option A (local linked plugin, recommended while iterating):
 
 ```bash
-git clone https://github.com/CapuzR/moltbank-npm.git
-openclaw plugins install -l ./moltbank-npm
+git clone https://github.com/moltbankhq/openclaw-plugin.git
+openclaw plugins install -l ./openclaw-plugin
 openclaw plugins enable moltbank
 openclaw config set plugins.entries.moltbank.config.appBaseUrl "${APP_BASE_URL:-https://app.moltbank.bot}"
 openclaw config set plugins.entries.moltbank.config.skillName "${MOLTBANK_SKILL_NAME:-MoltBank}"
@@ -170,7 +170,7 @@ openclaw moltbank setup
 Option B (registry package, when available):
 
 ```bash
-openclaw plugins install @moltbank/moltbank
+openclaw plugins install @moltbankhq/openclaw
 openclaw plugins enable moltbank
 openclaw config set plugins.entries.moltbank.config.appBaseUrl "${APP_BASE_URL:-https://app.moltbank.bot}"
 openclaw config set plugins.entries.moltbank.config.skillName "${MOLTBANK_SKILL_NAME:-MoltBank}"
