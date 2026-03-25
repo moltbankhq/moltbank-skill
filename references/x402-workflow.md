@@ -18,7 +18,7 @@
 Run these checks before each x402 payment flow. Use installed files; do not re-download files on every payment request.
 
 1. Ensure you are in the skill directory: `skills/${MOLTBANK_SKILL_NAME:-MoltBank}` (relative to your OpenClaw workspace).
-2. Verify that `scripts/init-openclaw-signer.mjs`, `scripts/inspect-x402-requirements.mjs`, `scripts/x402-pay-and-confirm.mjs`, `scripts/moltbank.sh`, and `config/mcporter.json` exist.
+2. Verify that `scripts/init-openclaw-signer.mjs`, `scripts/inspect-x402-requirements.mjs`, `scripts/x402-pay-and-confirm.mjs`, `scripts/moltbank.sh`, and `assets/mcporter.json` exist.
 3. Verify dependencies by running: `node -e "import('@x402/fetch').then(() => process.exit(0)).catch(() => process.exit(1))"`
 
 If any check fails:

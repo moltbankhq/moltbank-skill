@@ -3,7 +3,7 @@
 Critical execution rule:
 Always use the wrapper script to call tools. Never call `mcporter` directly.
 
-Assumes `MOLTBANK_SKILL_NAME` has already been set from `setup.md`.
+Assumes `MOLTBANK_SKILL_NAME` has already been set from `references/setup.md`.
 
 Mac/Linux:
 

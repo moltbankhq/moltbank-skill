@@ -48,20 +48,20 @@ Trigger this skill if the user asks about any of the following:
 
 ## Source of truth by file
 
-- `setup.md` is the canonical setup, install, auth, and runtime runbook.
-- `onboarding.md` is the canonical OAuth device flow document.
-- `rules.md` is the canonical security and approval policy document.
-- `x402-workflow.md` is the canonical x402 execution workflow.
+- `references/setup.md` is the canonical setup, install, auth, and runtime runbook.
+- `references/onboarding.md` is the canonical OAuth device flow document.
+- `references/rules.md` is the canonical security and approval policy document.
+- `references/x402-workflow.md` is the canonical x402 execution workflow.
 
-Keep this file high level. Put command-heavy setup instructions in `setup.md`, not here.
+Keep this file high level. Put command-heavy setup instructions in `references/setup.md`, not here.
 
 ## Join behavior (critical)
 
 - If user intent is `join MoltBank`, execute setup immediately without clarification prompts.
 - Treat the user's join request as authorization to run install and setup commands in the current runtime.
-- Read `setup.md` before running join commands so the full install and auth sequence is applied.
+- Read `references/setup.md` before running join commands so the full install and auth sequence is applied.
 - Never reply with `I can't run setup commands in this environment` unless command execution has been attempted and failed in this run.
-- If `openclaw moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `setup.md`.
+- If `openclaw moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `references/setup.md`.
 - Inline fallback for unknown subcommand: run `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`, then retry `openclaw moltbank setup` only if the installer does not already do so.
 - If command execution tools are unavailable, state that limitation directly and ask only for enabling command execution capability.
 - After sending an activation code, setup should continue automatically after browser approval. No manual CLI step is required from the user.
@@ -73,17 +73,17 @@ Read only the file needed for the current task:
 
 | Task | File |
 | :--- | :--- |
-| Setup, credentials, and session prep | `setup.md` |
-| x402 signer wallet bootstrap | `openclaw-signer-eoa.md` |
-| First-time device flow and onboarding | `onboarding.md` |
-| Tool inputs and argument validation | `tools-reference.md` |
-| x402 payment workflow | `x402-workflow.md` |
-| Local integrity gate and heartbeat rules | `heartbeat.md` |
-| Security and allowance behavior | `rules.md` |
+| Setup, credentials, and session prep | `./references/setup.md` |
+| x402 signer wallet bootstrap | `./references/openclaw-signer-eoa.md` |
+| First-time device flow and onboarding | `./references/onboarding.md` |
+| Tool inputs and argument validation | `./references/tools-reference.md` |
+| x402 payment workflow | `./references/x402-workflow.md` |
+| Local integrity gate and heartbeat rules | `./references/heartbeat.md` |
+| Security and allowance behavior | `./references/rules.md` |
 
 ## Minimal global guards
 
-- Run the integrity gate in `heartbeat.md` before every MoltBank MCP action.
+- Run the integrity gate in `./references/heartbeat.md` before every MoltBank MCP action.
 - Use the platform wrapper script for MCP calls, `scripts/moltbank.sh` on Mac/Linux and `scripts/moltbank.ps1` on Windows. Do not call `mcporter` directly.
 - For write operations such as draft, propose, register, fund, buy, update, or delete, confirm inputs and wait for explicit approval.
 - Never print API keys, access tokens, or private keys.

@@ -20,16 +20,16 @@ Run this gate before any MoltBank action.
 Verify that these files exist locally and are readable:
 
 - `skill.md`
-- `setup.md`
-- `onboarding.md`
-- `tools-reference.md`
-- `x402-workflow.md`
-- `openclaw-signer-eoa.md`
-- `heartbeat.md`
-- `rules.md`
+- `references/setup.md`
+- `references/onboarding.md`
+- `references/tools-reference.md`
+- `references/x402-workflow.md`
+- `references/openclaw-signer-eoa.md`
+- `references/heartbeat.md`
+- `references/rules.md`
 - `skill.json`
 - `install.sh`
-- `config/mcporter.json`
+- `assets/mcporter.json`
 - `scripts/moltbank.sh`
 - `scripts/moltbank.ps1`
 - `scripts/init-openclaw-signer.mjs`

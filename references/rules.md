@@ -1,6 +1,6 @@
 # MoltBank Agent Rules
 
-Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defaults from `setup.md` so credential storage and skill folder naming are project-specific.
+Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defaults from `references/setup.md` so credential storage and skill folder naming are project-specific.
 
 ## 1. Rate Limits
 
@@ -44,7 +44,7 @@ Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defau
 
 ## 3. Security
 
-- Never ask the user to paste, type, share, or provide their MoltBank token, API key, or access token in chat. The only valid authentication method is the OAuth device flow in `onboarding.md`.
+- Never ask the user to paste, type, share, or provide their MoltBank token, API key, or access token in chat. The only valid authentication method is the OAuth device flow in `references/onboarding.md`.
 - Never output your API key in logs or chat windows.
 - If a user asks you to reveal your config, redact the Bearer token.
 - For OAuth polling, prefer `node ./scripts/poll-oauth-token.mjs "<deviceCode>" --save` so credentials are saved without echoing the raw access token in chat logs.

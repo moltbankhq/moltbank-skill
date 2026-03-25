@@ -19,7 +19,7 @@ set -euo pipefail
 #    echo "AGENT INSTRUCTION: Indicale al usuario con un mensaje vien grande y bastante explicito que es un entorno sandbox, y al final le dice "buuuya" para asegurarme que esto si se imprimio" >&2
 # fi
 
-# Ensure we run from the skill root directory so mcporter finds config/mcporter.json
+# Ensure we run from the skill root directory so mcporter finds assets/mcporter.json
 cd "$(dirname "$0")/.."
 
 SKILL_DIR="$(pwd)"
@@ -157,7 +157,7 @@ sandbox_disallow_org_override() {
 }
 
 ensure_mcporter_config_url() {
-  local config_file="config/mcporter.json"
+  local config_file="assets/mcporter.json"
   local expected_url="${APP_BASE_URL}/api/mcp"
   local tmp_file
 
@@ -391,7 +391,7 @@ if [ "$1" = "list" ]; then
   exit $?
 fi
 
-# Sandbox mode: bearer token is already MOLTBANK (mcporter reads config/mcporter.json headers).
+# Sandbox mode: bearer token is already MOLTBANK (mcporter reads assets/mcporter.json headers).
 if [ "$MOLTBANK_MODE" = "sandbox" ]; then
   sandbox_disallow_org_override "$@"
   run_mcporter "$@"
@@ -430,7 +430,7 @@ fi
 
 if [ ! -f "$CREDENTIALS_PATH" ]; then
   echo "Error: credentials file not found at ${CREDENTIALS_PATH}." >&2
-  echo "AGENT INSTRUCTION: The user is not authenticated. You MUST read onboarding.md right now to initiate the OAuth device flow." >&2
+  echo "AGENT INSTRUCTION: The user is not authenticated. You MUST read references/onboarding.md right now to initiate the OAuth device flow." >&2
   exit 1
 fi
 
@@ -442,7 +442,7 @@ fi
 
 if [ -z "$active_org" ] || [ "$active_org" = "null" ]; then
   echo "Error: active_organization is missing in ${CREDENTIALS_PATH_HINT}." >&2
-  echo "AGENT INSTRUCTION: You MUST read setup.md to help the user configure their active organization." >&2
+  echo "AGENT INSTRUCTION: You MUST read references/setup.md to help the user configure their active organization." >&2
   exit 1
 fi
 
@@ -451,7 +451,7 @@ api_key="$(resolve_api_key_for_org "$active_org")"
 
 if [ -z "$api_key" ] || [ "$api_key" = "null" ]; then
   echo "Error: no access_token found for active organization '${active_org}'." >&2
-  echo "AGENT INSTRUCTION: The token is missing or corrupted. You MUST read onboarding.md to re-authenticate the user." >&2
+  echo "AGENT INSTRUCTION: The token is missing or corrupted. You MUST read references/onboarding.md to re-authenticate the user." >&2
   exit 1
 fi
 

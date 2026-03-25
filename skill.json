@@ -19,7 +19,7 @@
     "env": ["MOLTBANK"]
   },
   "paths": {
-    "mcporterConfig": "config/mcporter.json",
+    "mcporterConfig": "assets/mcporter.json",
     "wrapperScript": "scripts/moltbank.sh",
     "wrapperScriptWindows": "scripts/moltbank.ps1",
     "oauthDeviceCodeScript": "scripts/request-oauth-device-code.mjs",
