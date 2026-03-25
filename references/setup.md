@@ -35,7 +35,8 @@ If the runtime sends an explicit instruction to read workspace `HEARTBEAT.md` (f
 - Do not ask the user for obvious environment information like OS; detect it from runtime.
 - Only request user action when strictly required (OAuth activation in browser, explicit policy approvals, or user-provided secrets).
 - Always send onboarding code/instructions in the user channel output. Never rely on the user watching gateway console logs.
-- Use `openclaw moltbank setup` in nonblocking mode by default for channel responsiveness. Use blocking mode only if explicitly requested.
+- Prefer the standalone `moltbank` CLI when it is installed. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
+- Use `moltbank setup` in nonblocking mode by default for channel responsiveness when the CLI is available. Use `openclaw moltbank setup` only as a compatibility fallback, and use blocking mode only if explicitly requested.
 - In nonblocking mode, keep authentication progressing in the background so onboarding can complete even if a follow-up chat message is delayed.
 
 ### Join intent shortcut (mandatory)
@@ -90,7 +91,7 @@ Before claiming command execution is unavailable:
 Forbidden fallback when step 1 was not attempted:
 
 - "I can't run MoltBank setup commands directly in this environment."
-- "Run `openclaw moltbank setup` on your machine."
+- "Run `moltbank setup` on your machine."
 
 ### Unknown subcommand handling (mandatory)
 
@@ -155,7 +156,20 @@ _(Agent instruction: This script automatically restarts the gateway and runs set
 curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash
 ```
 
-Option A (local linked plugin, recommended while iterating):
+Option A (standalone CLI, preferred when you do not want the plugin):
+
+```bash
+npm install -g @moltbankhq/openclaw
+moltbank setup
+```
+
+Or without a global install:
+
+```bash
+npx @moltbankhq/openclaw setup
+```
+
+Option B (local linked plugin, recommended while iterating on plugin mode):
 
 ```bash
 git clone https://github.com/moltbankhq/openclaw-plugin.git
@@ -167,7 +181,7 @@ openclaw gateway restart
 openclaw moltbank setup
 ```
 
-Option B (registry package, when available):
+Option C (registry plugin package, compatibility mode):
 
 ```bash
 openclaw plugins install @moltbankhq/openclaw
