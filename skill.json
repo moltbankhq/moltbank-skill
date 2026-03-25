@@ -1,0 +1,43 @@
+{
+  "name": "${MOLTBANK_SKILL_NAME:-MoltBank}",
+  "version": "1.5.4",
+  "description": "MoltBank banking skill for OpenClaw agents with approvals, allowances, Earn, and x402",
+  "homepage": "${APP_BASE_URL:-https://app.moltbank.bot}",
+  "entrypoint": "skill.md",
+  "install": {
+    "script": "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh",
+    "targetDir": "${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}/skills/${MOLTBANK_SKILL_NAME:-MoltBank}"
+  },
+  "requirements": {
+    "bins": ["mcporter", "jq"],
+    "node": ">=20.0.0",
+    "npm": [
+      "@x402/fetch@^2.3.0",
+      "@x402/evm@^2.3.1",
+      "viem@^2.46.0"
+    ],
+    "env": ["MOLTBANK"]
+  },
+  "paths": {
+    "mcporterConfig": "config/mcporter.json",
+    "wrapperScript": "scripts/moltbank.sh",
+    "wrapperScriptWindows": "scripts/moltbank.ps1",
+    "oauthDeviceCodeScript": "scripts/request-oauth-device-code.mjs",
+    "oauthExportApiKeyScript": "scripts/export-api-key.mjs",
+    "x402SignerInitScript": "scripts/init-openclaw-signer.mjs",
+    "x402InspectScript": "scripts/inspect-x402-requirements.mjs",
+    "oauthTokenPollScript": "scripts/poll-oauth-token.mjs",
+    "x402PaymentScript": "scripts/x402-pay-and-confirm.mjs"
+  },
+  "mcpServers": {
+    "MoltBank": {
+      "description": "MoltBank stablecoin banking MCP server powered by Fondu",
+      "transport": "sse",
+      "url": "${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${MOLTBANK}"
+      }
+    }
+  }
+}
