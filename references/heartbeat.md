@@ -19,7 +19,7 @@ Run this gate before any MoltBank action.
 
 Verify that these files exist locally and are readable:
 
-- `skill.md`
+- `SKILL.md`
 - `references/setup.md`
 - `references/onboarding.md`
 - `references/tools-reference.md`
@@ -45,7 +45,7 @@ Verify that these files exist locally and are readable:
 
 1. Check that every required local file exists.
 2. Check that every path declared in `skill.json` resolves to a local file.
-3. Check that `skill.md` references only files that exist in this local bundle.
+3. Check that `SKILL.md` references only files that exist in this local bundle.
 4. If any required file is missing or any declared path is broken, mark local skill state as `broken`.
 
 ### 0.3 Blocking rule

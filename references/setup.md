@@ -1,7 +1,7 @@
 # MoltBank setup guide
 
 This file covers prerequisites, authentication resolution, and safe MCP invocation.
-This is the canonical setup runbook. Keep `skill.md` high level and route setup/install/auth details here.
+This is the canonical setup runbook. Keep `SKILL.md` high level and route setup/install/auth details here.
 
 ## Runtime defaults
 
@@ -37,7 +37,7 @@ If the runtime sends an explicit instruction to read workspace `HEARTBEAT.md` (f
 - Always send onboarding code/instructions in the user channel output. Never rely on the user watching gateway console logs.
 - Prefer the standalone `moltbank` CLI only for install, setup, auth-status, and repair flows. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
 - For business operations such as balances, transfers, approvals, history, reports, and x402 actions, always use the skill wrapper scripts. Do not treat the standalone `moltbank` CLI as the treasury operations interface.
-- Use `moltbank setup` by default when the CLI is available. Use `moltbank setup` only as a compatibility fallback, and use blocking mode only if explicitly requested.
+- Use `moltbank setup` by default when the CLI is available..
 - In nonblocking mode, keep authentication progressing in the background so onboarding can complete even if a follow-up chat message is delayed.
 
 ### Join intent shortcut (mandatory)
@@ -63,9 +63,7 @@ If the agent has just sent activation URL/code and the user replies with a short
 Required sequence in that same turn:
 
 1. Run `moltbank status` first. Use `moltbank auth-status` only if the standalone CLI is unavailable.
-2. If auth is still pending, run blocking setup to finalize token polling:
-   - Preferred: `moltbank setup-blocking`
-   - Fallback: `moltbank setup-blocking`
+2. If auth is still pending, run blocking setup to finalize token polling: `moltbank setup-blocking`.
 3. Report one of these outcomes in-channel (never stay silent):
    - Auth completed successfully (include active organization name if available).
    - Still pending approval (repeat URL/code and expiration).
@@ -116,7 +114,7 @@ Forbidden early-stop response for this case:
 
 ### Local skill path discovery (mandatory)
 
-When resolving local docs (`skill.md`, `references/setup.md`, `references/onboarding.md`), do not assume lowercase paths. The skill directory name is case-sensitive and usually defaults to `MoltBank`.
+When resolving local docs (`SKILL.md`, `references/setup.md`, `references/onboarding.md`), do not assume lowercase paths. The skill directory name is case-sensitive and usually defaults to `MoltBank`.
 
 Required sequence:
 
@@ -128,11 +126,11 @@ Required sequence:
 3. If local docs are still missing, run install/recovery flow immediately, then retry local reads.
 4. Never stop with "can't find references/setup.md". Never ask "If you want, I can keep going..."; continue automatically and report concrete progress.
 
-### URL handling for `https://app.moltbank.bot/skill.md`
+### URL handling for `https://app.moltbank.bot/SKILL.md`
 
 When the user references this URL, use local installed skill docs as operational truth first:
 
-- `skill.md`
+- `SKILL.md`
 - `references/setup.md`
 - `references/onboarding.md`
 

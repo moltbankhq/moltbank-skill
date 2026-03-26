@@ -23,7 +23,7 @@ Run these checks before each x402 payment flow. Use installed files; do not re-d
 
 If any check fails:
 
-1. Run the installation command appropriate for your OS from `skill.md` once.
+1. Run the installation command appropriate for your OS from `SKILL.md` once.
 2. Re-run the checks above.
 3. If checks still fail, stop and report the exact error (do not continue to Step 1).
 

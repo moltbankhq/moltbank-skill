@@ -28,7 +28,7 @@ The installer handles plugin setup and starts the MoltBank setup flow.
 
 ## Core files
 
-- `skill.md`: high-level entrypoint and execution policy
+- `SKILL.md`: high-level entrypoint and execution policy
 - `references/setup.md`: install, setup, authentication, and runtime runbook
 - `references/onboarding.md`: device-flow onboarding
 - `references/tools-reference.md`: tool inputs, validations, and wrapper usage
