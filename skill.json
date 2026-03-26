@@ -12,9 +12,9 @@
     "bins": ["mcporter", "jq"],
     "node": ">=20.0.0",
     "npm": [
-      "@x402/fetch@^2.3.0",
-      "@x402/evm@^2.3.1",
-      "viem@^2.46.0"
+      "@x402/fetch@2.3.0",
+      "@x402/evm@2.3.1",
+      "viem@2.46.0"
     ],
     "env": ["MOLTBANK"]
   },
