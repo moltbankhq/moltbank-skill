@@ -64,7 +64,7 @@ Keep this file high level. Put command-heavy setup instructions in `references/s
 - Read `references/setup.md` before running join commands so the full install and auth sequence is applied.
 - Never reply with `I can't run setup commands in this environment` unless command execution has been attempted and failed in this run.
 - If `moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `references/setup.md`.
-- Inline fallback for unknown subcommand: run `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`, then retry `moltbank setup` only if the installer does not already do so.
+- Inline fallback for unknown subcommand: install the MoltBank CLI via npm first (`npm install -g @moltbankhq/openclaw` or `npm exec --package @moltbankhq/openclaw -- moltbank setup`). Use the remote installer only when the npm CLI path is unavailable.
 - If command execution tools are unavailable, state that limitation directly and ask only for enabling command execution capability.
 - After sending an activation code, setup should continue automatically after browser approval. No manual CLI step is required from the user.
 - If the user replies with a short acknowledgment after activation steps, treat it as a command to check progress and continue.

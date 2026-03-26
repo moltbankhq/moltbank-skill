@@ -14,6 +14,7 @@ PLUGIN_LOCAL_PATH="${MOLTBANK_PLUGIN_LOCAL_PATH:-}"
 PLUGIN_INSTALL_MODE="${MOLTBANK_PLUGIN_INSTALL_MODE:-link}" # link|copy
 PLUGIN_GIT_URL="${MOLTBANK_PLUGIN_GIT_URL:-https://github.com/moltbankhq/openclaw-plugin.git}"
 PLUGIN_CLONE_DIR="${MOLTBANK_PLUGIN_CLONE_DIR:-./openclaw-plugin}"
+ALLOW_GIT_CLONE_FALLBACK="${MOLTBANK_ALLOW_GIT_CLONE_FALLBACK:-0}"
 
 LAST_INSTALL_OUTPUT=""
 
@@ -27,6 +28,17 @@ log_warn() {
 
 log_error() {
   printf '[ERROR] %s\n' "$1" >&2
+}
+
+allow_git_clone_fallback() {
+  case "$ALLOW_GIT_CLONE_FALLBACK" in
+    1|true|TRUE|yes|YES|on|ON)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 normalize_base_url() {
@@ -326,12 +338,17 @@ else
   fi
 
   if [ -z "$install_source" ]; then
-    log_warn "Local path install unavailable or failed; trying git clone fallback."
-    if install_from_git_clone "$PLUGIN_GIT_URL" "$PLUGIN_CLONE_DIR"; then
-      install_source="$PLUGIN_CLONE_DIR"
-    elif is_already_installed_output; then
-      log_warn "Git clone fallback appears to already be installed; continuing."
-      install_source="$PLUGIN_CLONE_DIR"
+    if allow_git_clone_fallback; then
+      log_warn "Local path install unavailable or failed; trying git clone fallback (explicitly enabled)."
+      if install_from_git_clone "$PLUGIN_GIT_URL" "$PLUGIN_CLONE_DIR"; then
+        install_source="$PLUGIN_CLONE_DIR"
+      elif is_already_installed_output; then
+        log_warn "Git clone fallback appears to already be installed; continuing."
+        install_source="$PLUGIN_CLONE_DIR"
+      fi
+    else
+      log_warn "Local path install unavailable or failed; skipping git clone fallback by default."
+      log_warn "Set MOLTBANK_ALLOW_GIT_CLONE_FALLBACK=1 only in trusted/dev environments if you want to allow cloning GitHub HEAD."
     fi
   fi
 fi
@@ -341,7 +358,8 @@ if [ -z "$install_source" ]; then
   log_error "OpenClaw only accepts registry packages, local paths, or local archives for plugin install."
   log_error "Try one of these:"
   log_error "  1) openclaw plugins install @moltbankhq/openclaw"
-  log_error "  2) git clone https://github.com/moltbankhq/openclaw-plugin.git && openclaw plugins install -l ./openclaw-plugin"
+  log_error "  2) openclaw plugins install -l /path/to/trusted/openclaw-plugin"
+  log_error "  3) export MOLTBANK_ALLOW_GIT_CLONE_FALLBACK=1 && re-run installer (trusted/dev environments only)"
   exit 1
 fi
 

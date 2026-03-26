@@ -21,6 +21,13 @@ Requirements:
 Recommended install:
 
 ```bash
+npm install -g @moltbankhq/openclaw
+moltbank setup
+```
+
+Compatibility bootstrap when the npm CLI path is unavailable:
+
+```bash
 curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash
 ```
 

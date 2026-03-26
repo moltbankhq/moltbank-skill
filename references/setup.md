@@ -48,11 +48,11 @@ Treat the user's join request as authorization to run install/setup commands in 
 
 Required sequence:
 
-1. Run the install script: `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
-2. **CRITICAL:** You MUST poll the process until it completely finishes and exits. Do not proceed to the next steps while it is still running.
-3. The install script automatically restarts the gateway and runs MoltBank setup at the end. **Do NOT** run `openclaw gateway restart` or `moltbank setup` manually.
-4. Read the final output of the completed installer to find the OAuth code/URL and relay it to the user in-channel.
-5. Only if the installer explicitly fails, use the manual local-link fallback.
+1. If `moltbank` is not already available, install the CLI: `npm install -g @moltbankhq/openclaw`
+2. Run `moltbank setup`
+3. **CRITICAL:** You MUST wait until setup completely finishes and exits. Do not proceed while it is still running.
+4. Read the final output to find the OAuth code/URL and relay it to the user in-channel.
+5. Only if the npm CLI path is unavailable or explicitly fails, use the compatibility bootstrap installer: `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
 
 Do not ask the user to choose between "setup / onboarding / explain capabilities" for this intent.
 
@@ -148,14 +148,7 @@ Required tools:
 
 If the plugin is not installed yet, use one of these supported methods:
 
-Recommended (one-step installer; includes stale-path cleanup + setup):
-_(Agent instruction: This script automatically restarts the gateway and runs setup. You must poll it until it completely exits. Do not run manual restarts or setup commands afterwards.)_
-
-```bash
-curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash
-```
-
-Option A (standalone CLI, preferred when you do not want the plugin):
+Recommended (preferred reproducible CLI path):
 
 ```bash
 npm install -g @moltbankhq/openclaw
@@ -168,11 +161,16 @@ Or without a global install:
 npx @moltbankhq/openclaw setup
 ```
 
-Option B (local linked plugin, recommended while iterating on plugin mode):
+Compatibility bootstrap (remote installer; use only when the npm CLI path is unavailable):
 
 ```bash
-git clone https://github.com/moltbankhq/openclaw-plugin.git
-openclaw plugins install -l ./openclaw-plugin
+curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash
+```
+
+Local linked plugin (dev/trusted local checkout only):
+
+```bash
+openclaw plugins install -l /path/to/trusted/openclaw-plugin
 openclaw plugins enable moltbank
 openclaw config set plugins.entries.moltbank.config.appBaseUrl "${APP_BASE_URL:-https://app.moltbank.bot}"
 openclaw config set plugins.entries.moltbank.config.skillName "${MOLTBANK_SKILL_NAME:-MoltBank}"
