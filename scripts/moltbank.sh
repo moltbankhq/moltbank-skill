@@ -132,8 +132,10 @@ export MOLTBANK_SKILL_NAME="$SKILL_NAME"
 # --- Credential Resolution (detect-and-fallback) ---
 #
 # Host:   credentials.json exists at CREDENTIALS_PATH → multi-org, jq resolves token.
-# Sandbox: no file, but MOLTBANK is set → single org; mcporter substitutes
-#          Authorization: Bearer ${MOLTBANK} (same effect as AUTH_HEADER in spec).
+# Sandbox: plugin usually injects MOLTBANK_CREDENTIALS_PATH to a workspace-mounted,
+#          skill-local credentials file. Wrapper resolves token/private key from that file.
+# Legacy sandbox: no file, but MOLTBANK is set → single org; mcporter substitutes
+#                Authorization: Bearer ${MOLTBANK} (same effect as AUTH_HEADER in spec).
 # Neither: no file, no env var → real MCP calls fail with setup instructions below.
 #          Exception: `mcporter list` is allowed with a placeholder token (install check).
 #
@@ -195,7 +197,7 @@ emit_known_error_guidance() {
   local output="$1"
 
   if [[ "$output" == *"Failed to resolve header 'Authorization'"* && "$output" == *"MOLTBANK"* ]]; then
-    echo "AGENT INSTRUCTION: MoltBank auth failed. The wrapper uses ${CREDENTIALS_PATH_HINT} (host) when present; otherwise set MOLTBANK in your OpenClaw environment (sandbox)." >&2
+    echo "AGENT INSTRUCTION: MoltBank auth failed. The wrapper uses ${CREDENTIALS_PATH_HINT} (host) when present; otherwise verify the plugin-managed sandbox credentials path and rerun setup." >&2
   fi
 
   if [[ "$output" == *"Agent authorization context is required."* ]]; then
@@ -416,10 +418,9 @@ if [ "$MOLTBANK_MODE" = "none" ]; then
   echo "  node ./scripts/request-oauth-device-code.mjs" >&2
   echo "  node ./scripts/poll-oauth-token.mjs \"<deviceCode>\" --save" >&2
   echo "" >&2
-  echo "Option B (sandbox/Docker): Set MOLTBANK in your OpenClaw environment:" >&2
-  echo "  Add to ~/.openclaw/.env:" >&2
-  echo "    MOLTBANK=your_token_here" >&2
-  echo "  Then start a new OpenClaw session." >&2
+  echo "Option B (sandbox/Docker): Verify the plugin-managed sandbox credentials path:" >&2
+  echo "  Re-run: moltbank setup" >&2
+  echo "  If it still fails, ask your administrator to verify the MoltBank OpenClaw plugin configuration." >&2
   exit 1
 fi
 

@@ -41,7 +41,7 @@ if (Test-Path -LiteralPath $CredsFile) {
   Write-Error "MoltBank credentials not found."
   Write-Error ""
   Write-Error "Option A (recommended): Run OAuth onboarding on your host machine."
-  Write-Error "Option B (sandbox): Set MOLTBANK in ~/.openclaw/.env"
+  Write-Error "Option B (sandbox): Re-run 'moltbank setup' and verify the MoltBank OpenClaw plugin configuration."
   exit 1
 }
 # --- End Credential Resolution ---

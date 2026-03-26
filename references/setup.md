@@ -200,18 +200,23 @@ Do not use `github:<user>/<repo>` as the install spec; OpenClaw rejects that inp
 Before reading any file or asking the user anything, check if the sandbox environment variables are set:
 
 ```bash
-[ -n "${MOLTBANK:-}" ] && [ -n "${ACTIVE_ORG_OVERRIDE:-}" ] && echo "sandbox ready"
+[ -n "${MOLTBANK_CREDENTIALS_PATH:-}" ] && echo "sandbox ready"
 ```
 
-**If `MOLTBANK` and `ACTIVE_ORG_OVERRIDE` are both set → sandbox mode is active.**
+**If `MOLTBANK_CREDENTIALS_PATH` is set → sandbox mode is active.**
 
-- The OpenClaw plugin has already authenticated and injected all required variables.
+- The OpenClaw plugin has already authenticated and injected a sandbox-local credentials path.
 - Set session state immediately:
-  - `currentOrganization` = value of `ACTIVE_ORG_OVERRIDE`
-  - `currentToken` = value of `MOLTBANK`
-- If `SIGNER` is also set, the EOA signer private key is available for x402 flows.
+   - `currentOrganization` = value of `ACTIVE_ORG_OVERRIDE` when present, otherwise read `active_organization` from `${MOLTBANK_CREDENTIALS_PATH}`
+   - `currentToken` = resolve from the active organization inside `${MOLTBANK_CREDENTIALS_PATH}`
+- If `x402_signer_private_key` exists in `${MOLTBANK_CREDENTIALS_PATH}`, the EOA signer private key is available for x402 flows.
 - **Skip all credential file checks, onboarding prompts, and auth flows entirely.**
 - Proceed directly to tool execution.
+
+Compatibility fallback:
+
+- Older sandbox installs may still expose `MOLTBANK` and `ACTIVE_ORG_OVERRIDE` directly.
+- If `MOLTBANK_CREDENTIALS_PATH` is missing but `MOLTBANK` is set, treat that as a legacy sandbox auth path and continue.
 
 ---
 
@@ -220,17 +225,17 @@ Credential validation is mode-dependent:
 If host `credentials.json` already has `active_organization`, treat onboarding as already complete and skip any `/activate` prompt.
 
 - **Host mode:** `${MOLTBANK_CREDENTIALS_PATH}` (or `$env:MOLTBANK_CREDENTIALS_PATH` on Windows) exists and contains `active_organization`.
-- **Sandbox mode:** `MOLTBANK` env var is set (single-org mode).
+- **Sandbox mode:** `${MOLTBANK_CREDENTIALS_PATH}` points at the mounted sandbox credentials file. Legacy fallback: `MOLTBANK` env var is set.
 
-If host credentials are missing, check `MOLTBANK` before sending users to onboarding.
+If host credentials are missing, check `${MOLTBANK_CREDENTIALS_PATH}` or legacy `MOLTBANK` before sending users to onboarding.
 
 **NEVER ask the user for their MOLTBANK token.** The token is obtained ONLY via the OAuth device flow in `references/onboarding.md`. If credentials are missing, initiate that flow — do NOT ask the user to paste, type, or share any token, API key, or access token in chat.
 
 **ABSOLUTE SECURITY RULE: NEVER ask the user to paste, type, or share their MOLTBANK token, API key, or access token in chat — under any circumstance.** The token is obtained ONLY via the OAuth device flow in `references/onboarding.md`. If credentials are missing, run `node ./scripts/request-oauth-device-code.mjs` from the skill directory and guide the user through the device flow.
 
-**Hard rule (do not guess):** Before telling the user to "connect account", "set up MoltBank API key", or run onboarding, you MUST verify credentials using wrapper logic (host file OR sandbox env var).
+**Hard rule (do not guess):** Before telling the user to "connect account", "set up MoltBank API key", or run onboarding, you MUST verify credentials using wrapper logic (host file OR sandbox credentials path / legacy env fallback).
 
-**New Verification Rule:** I MUST always exhaustively verify credentials in the system path (host mode) AND in environment variables (sandbox mode). ONLY if BOTH verifications fail, should I proceed with the OAuth flow.
+**New Verification Rule:** I MUST always exhaustively verify credentials in the system path (host mode) AND in the sandbox auth source (`MOLTBANK_CREDENTIALS_PATH`, with legacy `MOLTBANK` fallback). ONLY if BOTH verifications fail, should I proceed with the OAuth flow.
 
 When checking `credentials.json`, never print the full file in chat logs. Query only the minimum fields needed for flow control (for example `active_organization`) and always redact token values.
 
@@ -238,11 +243,13 @@ Do not infer missing MoltBank credentials from unrelated errors (for example: mi
 
 If `credentials.json` exists and `active_organization` is present, treat the user as already authenticated for MoltBank and continue (host mode).
 
-If `credentials.json` is not available but `MOLTBANK` is present, treat the user as authenticated in sandbox mode and continue.
+If host `credentials.json` is not available but `MOLTBANK_CREDENTIALS_PATH` is present, treat the user as authenticated in sandbox mode and continue.
+
+If `MOLTBANK_CREDENTIALS_PATH` is not present but `MOLTBANK` is present, treat the user as authenticated in legacy sandbox mode and continue.
 
 **Missing credentials — response by mode:**
 
-- **Sandbox mode** (`MOLTBANK` is NOT set in env): The plugin did not inject credentials correctly. Tell the user: _"MoltBank credentials are not available in this environment. Please ask your administrator to verify the plugin configuration."_ Do NOT start onboarding. Do NOT ask for a token. Stop here.
+- **Sandbox mode** (`MOLTBANK_CREDENTIALS_PATH` is NOT set and legacy `MOLTBANK` is also absent): The plugin did not inject credentials correctly. Tell the user: _"MoltBank credentials are not available in this environment. Please ask your administrator to verify the plugin configuration."_ Do NOT start onboarding. Do NOT ask for a token. Stop here.
 - **Host mode** (`credentials.json` does NOT exist): Start the OAuth device flow immediately — run `node ./scripts/request-oauth-device-code.mjs` from the skill directory and guide the user through the device activation steps. Do NOT ask the user for a token.
 
 **Mac/Linux quick check:**
@@ -399,8 +406,8 @@ $wrapper = "$env:USERPROFILE\.openclaw\workspace\skills\$env:MOLTBANK_SKILL_NAME
 - Never output API keys or private keys.
 - Commands like `node ./scripts/init-openclaw-signer.mjs ...` and `node ./scripts/inspect-x402-requirements.mjs ...` are the same on Mac/Linux and Windows PowerShell once you are already in the skill directory.
 - For x402 signer bootstrap, use `node ./scripts/init-openclaw-signer.mjs "<safeAddress>"`. Never ask the user to edit `credentials.json` for `x402_signer_private_key`.
-- **Sandbox mode x402:** If `SIGNER` is set in the environment, `init-openclaw-signer.mjs` uses it directly (no `credentials.json` needed). The script returns `sandboxMode: true` and the `signerAddress`. Use `PRIVATE_KEY=$SIGNER` when calling `x402-pay-and-confirm.mjs`:
-  ```bash
-  cd /workspace/skills/MoltBank && PRIVATE_KEY=$SIGNER node scripts/x402-pay-and-confirm.mjs "$x402Url" GET
-  ```
-  Never run `init-openclaw-signer.mjs` with a `safeAddress` arg in sandbox — the key is already available via `$SIGNER`.
+- **Sandbox mode x402:** Prefer the sandbox credentials file exposed through `MOLTBANK_CREDENTIALS_PATH`. `init-openclaw-signer.mjs` and `x402-pay-and-confirm.mjs` can read the active organization and signer directly from that file. If an older sandbox still exposes `SIGNER`, that remains a compatibility fallback only.
+   ```bash
+   cd /workspace/skills/MoltBank && node scripts/x402-pay-and-confirm.mjs "$x402Url" GET
+   ```
+   Never ask the user to paste a signer private key. If a signer does not exist yet, initialize it through `init-openclaw-signer.mjs`, which writes it to the sandbox credentials file.
