@@ -1,6 +1,6 @@
 {
   "name": "${MOLTBANK_SKILL_NAME:-MoltBank}",
-  "version": "1.5.4",
+  "version": "0.1.0",
   "description": "MoltBank stablecoin treasury skill for OpenClaw agents with approvals, allowances, Earn, and x402",
   "homepage": "${APP_BASE_URL:-https://app.moltbank.bot}",
   "entrypoint": "SKILL.md",
