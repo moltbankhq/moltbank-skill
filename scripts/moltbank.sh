@@ -24,6 +24,7 @@ cd "$(dirname "$0")/.."
 
 SKILL_DIR="$(pwd)"
 SKILL_ENV_FILE="${SKILL_DIR}/.project.env"
+MCPORTER_CONFIG_PATH="${SKILL_DIR}/assets/mcporter.json"
 
 if [ -f "$SKILL_ENV_FILE" ]; then
   set -a
@@ -211,7 +212,7 @@ run_mcporter() {
   local status
 
   set +e
-  output="$(mcporter "$@" 2>&1)"
+  output="$(mcporter --config "$MCPORTER_CONFIG_PATH" "$@" 2>&1)"
   status=$?
   set -e
 
