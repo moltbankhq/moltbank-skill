@@ -3,7 +3,7 @@ name: moltbank
 description: MCP skill for MoltBank stablecoin treasury workflows, approvals, allowances, Earn, and x402.
 metadata:
   category: finance
-  version: 1.5.4
+  version: 0.1.0
   homepage: ${APP_BASE_URL:-https://app.moltbank.bot}
   api_base: ${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp
   install_script: ${APP_BASE_URL:-https://app.moltbank.bot}/install.sh
