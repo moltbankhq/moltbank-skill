@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 /**
+ * SECURITY MANIFEST:
+ *   Environment variables accessed: MOLTBANK_CREDENTIALS_PATH, APP_BASE_URL,
+ *     MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
+ *   External endpoints called: user-specified x402 URL (HEAD/GET/POST to inspect 402 response)
+ *   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+ *   Local files written: none
+ *
  * Inspect x402 payment requirements without attempting payment.
  *
  * Supports both:

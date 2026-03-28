@@ -1,3 +1,10 @@
+// SECURITY MANIFEST:
+//   Environment variables accessed: APP_BASE_URL, MOLTBANK_CREDENTIALS_PATH,
+//     MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
+//   External endpoints called: none (utility module, no network calls)
+//   Local files read: .project.env, ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+//   Local files written: none
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';

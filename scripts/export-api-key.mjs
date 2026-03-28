@@ -1,3 +1,9 @@
+// SECURITY MANIFEST:
+//   Environment variables accessed: MOLTBANK_CREDENTIALS_PATH, HOME (only)
+//   External endpoints called: none
+//   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+//   Local files written: none
+
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

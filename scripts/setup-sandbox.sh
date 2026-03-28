@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# SECURITY MANIFEST:
+#   Environment variables accessed: none
+#   External endpoints called: none
+#   Local files read: openclaw config
+#   Local files written: openclaw config (sandbox.docker.setupCommand)
 set -e
 
 EXISTING=$(openclaw config get agents.defaults.sandbox.docker.setupCommand 2>/dev/null)

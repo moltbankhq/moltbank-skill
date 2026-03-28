@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// SECURITY MANIFEST:
+//   Environment variables accessed: APP_BASE_URL, MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
+//   External endpoints called: ${APP_BASE_URL}/api/auth/device/code (only)
+//   Local files read: none
+//   Local files written: none
 
 import { resolveAppBaseUrl } from './openclaw-runtime-config.mjs';
 

@@ -2,6 +2,13 @@
 /**
  * x402 Pay and Confirm - Script to confirm payment with the x402 server.
  *
+ * SECURITY MANIFEST:
+ *   Environment variables accessed: PRIVATE_KEY, X402_JSON_BODY, MOLTBANK_CREDENTIALS_PATH,
+ *     APP_BASE_URL, MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
+ *   External endpoints called: user-specified x402 merchant URL, Base L2 RPC (via viem)
+ *   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+ *   Local files written: none
+ *
  * Uses @x402/fetch and @x402/evm to: 1) request the URL, 2) receive 402,
  * 3) pay on-chain with the signer, 4) retry with proof and get 200.
  *

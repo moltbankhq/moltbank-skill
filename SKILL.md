@@ -1,22 +1,41 @@
 ---
 name: moltbank
-description: MCP skill for MoltBank stablecoin treasury workflows, approvals, allowances, Earn, and x402.
+description: Let your agent fleet spend with guardrails. Manage USDC treasury, payments, Earn positions, and x402 purchases — set budgets for agents, draft proposals, approve transfers, and track spend without leaving your agent.
+homepage: https://app.moltbank.bot
 metadata:
   category: finance
   version: 0.1.0
+<<<<<<< HEAD
   homepage: ${APP_BASE_URL:-https://app.moltbank.bot}
   api_base: ${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp
   install_script: ${APP_BASE_URL:-https://app.moltbank.bot}/install.sh
   openclaw:
+=======
+  clawdbot:
+    emoji: "🏦"
+>>>>>>> 0551531 (refactor: update README and SKILL.md for clarity, add compliance documentation, and enhance security manifests in scripts)
     requires:
+      env: ["MOLTBANK"]
+      anyBins: ["mcporter", "jq"]
+      npm:
+        - '@x402/fetch@2.3.0'
+        - '@x402/evm@2.3.1'
+        - 'viem@2.46.0'
+    primaryEnv: MOLTBANK
+    files: ["scripts/*", "references/*", "assets/*"]
+  openclaw:
+    emoji: "🏦"
+    requires:
+      env: ["MOLTBANK"]
       bins:
         - mcporter
         - jq
       npm:
-        - '@x402/fetch@^2.3.0'
-        - '@x402/evm@^2.3.1'
-        - 'viem@^2.46.0'
+        - '@x402/fetch@2.3.0'
+        - '@x402/evm@2.3.1'
+        - 'viem@2.46.0'
     primaryEnv: MOLTBANK
+    files: ["scripts/*", "references/*", "assets/*"]
 ---
 
 # MoltBank skill for AI agents
@@ -54,6 +73,7 @@ Trigger this skill if the user asks about any of the following:
 - `references/onboarding.md` is the canonical OAuth device flow document.
 - `references/rules.md` is the canonical security and approval policy document.
 - `references/x402-workflow.md` is the canonical x402 execution workflow.
+- `references/compliance.md` is the canonical trust disclosure, endpoint inventory, and operational boundaries document.
 
 Keep this file high level. Put command-heavy setup instructions in `references/setup.md`, not here.
 
@@ -82,6 +102,7 @@ Read only the file needed for the current task:
 | x402 payment workflow | `./references/x402-workflow.md` |
 | Local integrity gate and heartbeat rules | `./references/heartbeat.md` |
 | Security and allowance behavior | `./references/rules.md` |
+| Compliance, trust, and endpoint disclosure | `./references/compliance.md` |
 
 ## Minimal global guards
 
@@ -89,3 +110,7 @@ Read only the file needed for the current task:
 - Use the platform wrapper script for MCP calls, `scripts/moltbank.sh` on Mac/Linux and `scripts/moltbank.ps1` on Windows. Do not call `mcporter` directly.
 - For write operations such as draft, propose, register, fund, buy, update, or delete, confirm inputs and wait for explicit approval.
 - Never print API keys, access tokens, or private keys.
+
+## Version history
+
+- 0.1.0 — Initial publicly available version.

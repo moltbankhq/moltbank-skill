@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// SECURITY MANIFEST:
+//   Environment variables accessed: MOLTBANK_CREDENTIALS_PATH, APP_BASE_URL,
+//     MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
+//   External endpoints called: ${APP_BASE_URL}/api/auth/device/token (only)
+//   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+//   Local files written: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json (token save)
 
 import fs from 'fs';
 import path from 'path';

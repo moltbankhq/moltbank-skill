@@ -1,3 +1,10 @@
+# SECURITY MANIFEST:
+#   Environment variables accessed: MOLTBANK, MOLTBANK_CREDENTIALS_PATH, MOLTBANK_SKILL_NAME,
+#     APP_BASE_URL, OPENCLAW_WORKSPACE, USERPROFILE (only)
+#   External endpoints called: none (delegates to bash wrapper / mcporter)
+#   Local files read: scripts/moltbank.sh
+#   Local files written: none
+
 [CmdletBinding()]
 param(
   [Parameter(ValueFromRemainingArguments = $true)]

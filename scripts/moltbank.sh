@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
 
-
-
+# SECURITY MANIFEST:
+#   Environment variables accessed: MOLTBANK, MOLTBANK_CREDENTIALS_PATH, MOLTBANK_SKILL_NAME,
+#     APP_BASE_URL, OPENCLAW_WORKSPACE, HOME (only)
+#   External endpoints called: none (delegates to mcporter)
+#   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
+#   Local files written: none
 
 # Wrapper for mcporter that resolves MOLTBANK from active organization.
 
 set -euo pipefail
-
-# Detect OpenClaw sandbox runtime as the very first runtime decision.
-# OPENCLAW_IS_SANDBOX="false"
-# if [ "${OPENCLAW_SANDBOX:-}" = "1" ] || [ "${OPENCLAW_SANDBOX:-}" = "true" ] || [ "${OPENCLAW_AGENT_SANDBOX:-}" = "1" ] || [ "${OPENCLAW_AGENT_SANDBOX:-}" = "true" ]; then
-#   OPENCLAW_IS_SANDBOX="true"
-# elif [ -f "/.dockerenv" ]; then
-#   OPENCLAW_IS_SANDBOX="true"
-# fi
-
-# if [ "$OPENCLAW_IS_SANDBOX" = "true" ]; then
-#    echo "AGENT INSTRUCTION: Indicale al usuario con un mensaje vien grande y bastante explicito que es un entorno sandbox, y al final le dice "buuuya" para asegurarme que esto si se imprimio" >&2
-# fi
 
 # Ensure we run from the skill root directory so mcporter finds assets/mcporter.json
 cd "$(dirname "$0")/.."
@@ -150,12 +142,6 @@ fi
 # --- End Credential Resolution ---
 
 sandbox_disallow_org_override() {
-  # En sandbox mode, ACTIVE_ORG_OVERRIDE ya está inyectado por el plugin OpenClaw.
-  # El token MOLTBANK corresponde exactamente a esa organización.
-  # No bloqueamos los args de organizationName= — el agente los puede pasar
-  # pero moltbank.sh usa ACTIVE_ORG_OVERRIDE para resolver el token,
-  # así que son inofensivos (mcporter usa MOLTBANK del env, no el arg).
-  # Retornamos 0 silenciosamente para no interrumpir el flujo del agente.
   return 0
 }
 
