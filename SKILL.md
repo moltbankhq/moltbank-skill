@@ -5,15 +5,10 @@ homepage: https://app.moltbank.bot
 metadata:
   category: finance
   version: 0.1.0
-<<<<<<< HEAD
-  homepage: ${APP_BASE_URL:-https://app.moltbank.bot}
-  api_base: ${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp
-  install_script: ${APP_BASE_URL:-https://app.moltbank.bot}/install.sh
-  openclaw:
-=======
+  api_base: https://app.moltbank.bot/api/mcp
+  install_script: https://app.moltbank.bot/install.sh
   clawdbot:
     emoji: "🏦"
->>>>>>> 0551531 (refactor: update README and SKILL.md for clarity, add compliance documentation, and enhance security manifests in scripts)
     requires:
       env: ["MOLTBANK"]
       anyBins: ["mcporter", "jq"]
