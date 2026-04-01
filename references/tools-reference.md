@@ -87,7 +87,7 @@ Description: create a draft payment proposal for human review. Does not send fun
 
 #### `propose_transaction`
 
-Description: initiate a payment to an external contact. Can be drafted as a proposal or executed instantly with bot allowance.
+Description: initiate a payment to an external contact. Can be drafted as a proposal or executed instantly with bot budget.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -97,13 +97,13 @@ Description: initiate a payment to an external contact. Can be drafted as a prop
 | `recipientAddress` | No | string | Wallet address if not using contact. |
 | `amount` | Yes | number | Positive USDC amount. |
 | `notes` | No | string | Optional notes. |
-| `useAllowance` | No | boolean | `true` executes instantly using allowance. Defaults to `false`. |
+| `useBudget` | No | boolean | `true` executes instantly using budget. Defaults to `false`. |
 
-If `useAllowance=false` and a proposal is created, use the returned `approvalLink` or `/approval/<proposalId>`.
+If `useBudget=false` and a proposal is created, use the returned `approvalLink` or `/approval/<proposalId>`.
 
 #### `propose_internal_transfer`
 
-Description: transfer USDC between two accounts. Can be drafted as a proposal or executed instantly with bot allowance.
+Description: transfer USDC between two accounts. Can be drafted as a proposal or executed instantly with bot budget.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -113,7 +113,7 @@ Description: transfer USDC between two accounts. Can be drafted as a proposal or
 | `destinationAccountName` | Yes | string | Destination account. |
 | `amount` | Yes | number | Positive USDC amount. |
 | `notes` | No | string | Optional notes. |
-| `useAllowance` | No | boolean | `true` executes instantly using allowance. Defaults to `false`. |
+| `useBudget` | No | boolean | `true` executes instantly using budget. Defaults to `false`. |
 
 #### `cancel_proposal`
 
@@ -320,7 +320,7 @@ Rule: validations before Aave deposit or withdraw.
 
 #### `manage_earn_position`
 
-Description: deposit to or withdraw from Aave using bot allowance.
+Description: deposit to or withdraw from Aave using bot budget.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -351,11 +351,11 @@ Description: create a regular internal proposal for Aave deposit or withdraw.
 
 ---
 
-### OpenClaw allowances
+### OpenClaw budgets
 
-#### `propose_openclaw_allowance`
+#### `propose_openclaw_budget`
 
-Description: create a proposal to grant this OpenClaw bot allowance on an account. Positive `transferLimitUSDC` can pre-authorize the Base x402 signer gas top-up route after the initial allowance approval.
+Description: create a proposal to grant this OpenClaw bot budget on an account. Positive `transferLimitUSDC` can pre-authorize the Base x402 signer gas top-up route after the initial budget approval.
 
 Critical validation and casing rules:
 
@@ -367,30 +367,30 @@ Critical validation and casing rules:
 | :---- | :------- | :--- | :----------------------- |
 | `organizationName` | Yes | string | Organization. |
 | `accountName` | Yes | string | Account. |
-| `earnLimitUSDC` | No | number | Non-negative Earn allowance limit. |
-| `transferLimitUSDC` | No | number | Non-negative transfer allowance limit. |
+| `earnLimitUSDC` | No | number | Non-negative Earn budget limit. |
+| `transferLimitUSDC` | No | number | Non-negative transfer budget limit. |
 | `chain` | No | enum | `base`. Default: `base`. |
 | `period` | Yes | enum | `Day`, `Week`, or `Month`. |
 | `startsAtUnix` | No | number | Positive Unix timestamp in seconds. |
 
 Behavior:
 
-- On Base, register the bot signer first with `register_openclaw_x402_wallet` before creating a transfer allowance.
-- The allowance proposal can bind the Base LI.FI gas-top-up route to that signer wallet.
-- The response includes `hasX402Preauthorization` so you can confirm whether the reusable Base gas route was embedded in the allowance proposal.
-- The LI.FI gas-top-up action shares the same transfer budget, so x402 gas top-ups consume the existing transfer allowance instead of a separate hidden budget.
+- On Base, register the bot signer first with `register_openclaw_x402_wallet` before creating a transfer budget.
+- The budget proposal can bind the Base LI.FI gas-top-up route to that signer wallet.
+- The response includes `hasX402Preauthorization` so you can confirm whether the reusable Base gas route was embedded in the budget proposal.
+- The LI.FI gas-top-up action shares the same transfer budget, so x402 gas top-ups consume the existing transfer budget instead of a separate hidden cap.
 
 Canonical wrapper example (Mac/Linux):
 
 ```bash
-./scripts/moltbank.sh call MoltBank.propose_openclaw_allowance organizationName="Acme" accountName="Main" chain="base" transferLimitUSDC=20 period="Day"
+./scripts/moltbank.sh call MoltBank.propose_openclaw_budget organizationName="Acme" accountName="Main" chain="base" transferLimitUSDC=20 period="Day"
 ```
 
 Canonical wrapper example (Windows PowerShell):
 
 ```powershell
 $wrapper = "$env:USERPROFILE\.openclaw\workspace\skills\$env:MOLTBANK_SKILL_NAME\scripts\moltbank.ps1"
-& $wrapper call MoltBank.propose_openclaw_allowance organizationName="Acme" accountName="Main" chain="base" transferLimitUSDC=20 period="Day"
+& $wrapper call MoltBank.propose_openclaw_budget organizationName="Acme" accountName="Main" chain="base" transferLimitUSDC=20 period="Day"
 ```
 
 ---
@@ -414,7 +414,7 @@ Description: browse the public x402 Bazaar catalog from the Coinbase CDP facilit
 Behavior:
 
 - Returns Bazaar resources, accepts data, metadata, and pagination.
-- Discovery is read-only and does not spend allowance.
+- Discovery is read-only and does not spend budget.
 - Before `buy_x402_good`, run `node ./scripts/inspect-x402-requirements.mjs "<x402Url>" [GET|POST]` to read the exact required amount.
 
 #### `register_openclaw_x402_wallet`
@@ -446,7 +446,7 @@ Behavior:
 
 #### `propose_openclaw_x402_gas_topup`
 
-Description: top up signer ETH gas from Safe funds via the Base LI.FI path. New Base transfer allowances normally pre-authorize this route, so the tool should execute instantly after allowance approval. Older allowances may still fall back to ordered approval proposals.
+Description: top up signer ETH gas from Safe funds via the Base LI.FI path. New Base transfer budgets normally pre-authorize this route, so the tool should execute instantly after budget approval. Older budgets may still fall back to ordered approval proposals.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -456,13 +456,13 @@ Description: top up signer ETH gas from Safe funds via the Base LI.FI path. New 
 
 Behavior:
 
-- Checks OpenClaw transfer allowance before executing or creating proposals.
-- If the allowance was created after the signer wallet was registered, it should usually execute instantly and send ETH to the signer wallet directly.
+- Checks OpenClaw transfer budget before executing or creating proposals.
+- If the transfer budget was created after the signer wallet was registered, it should usually execute instantly and send ETH to the signer wallet directly.
 - Otherwise it may create ordered approval proposals.
 
 #### `buy_x402_good`
 
-Description: use OpenClaw transfer allowance to fund the registered bot x402 wallet on Base. Call this only when the bot wallet balance is insufficient. The amount must come from the x402 payment requirements, not from a guessed user input. After funding, the tool also checks signer gas and attempts the default gas top-up automatically when signer ETH is still low.
+Description: use OpenClaw transfer budget to fund the registered bot x402 wallet on Base. Call this only when the bot wallet balance is insufficient. The amount must come from the x402 payment requirements, not from a guessed user input. After funding, the tool also checks signer gas and attempts the default gas top-up automatically when signer ETH is still low.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -487,7 +487,7 @@ Description: record an immutable x402 payment audit row after the bot pays local
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
 | `organizationName` | Yes | string | Organization. |
-| `accountName` | Yes | string | Account linked to the bot allowance and wallet. |
+| `accountName` | Yes | string | Account linked to the bot budget and wallet. |
 | `x402Url` | Yes | string | Valid URL of the x402 good that was paid. |
 | `paymentHttpStatus` | No | number | Integer 100 to 599. |
 | `paidAmount` | No | number | Positive USDC amount actually paid. |
@@ -520,11 +520,11 @@ Description: list recorded x402 payment receipts for an organization.
 
 ---
 
-### Allowance introspection
+### Budget introspection
 
-#### `check_bot_allowances`
+#### `check_bot_budget`
 
-Description: return current remaining bot allowances and reset timestamps for transfer and earn limits.
+Description: return current remaining bot budget (transfer and earn limits) and reset timestamps.
 
 | Input | Required | Type | Validation / description |
 | :---- | :------- | :--- | :----------------------- |
@@ -532,4 +532,6 @@ Description: return current remaining bot allowances and reset timestamps for tr
 | `accountName` | Yes | string | Account. |
 | `chain` | No | enum | `base`. Default: `base`. |
 
-Use this before high-cost actions to avoid expected allowance failures.
+Use this before high-cost actions to avoid expected budget failures.
+
+**Budget-related JSON values:** tools may return strings such as `missing_budget`, `budget_inactive`, `insufficient_budget`, `no_budgets_configured`, `active_budgets_found`, `missing_refill_budget`, `no_refill_budget`, or `insufficient_budget_remaining` in `status`, `reason`, or nested fields (for example `gasTopUp.result` may be `insufficient_budget` when signer funding succeeded but default gas top-up could not use enough remaining transfer budget).

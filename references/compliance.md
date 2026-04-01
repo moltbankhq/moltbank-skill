@@ -25,7 +25,7 @@ The installer and plugin read and write `~/.openclaw/openclaw.json` in addition 
 
 ### Operational boundaries
 
-- Does not execute on-chain transactions without user approval, except for allowance-scoped operations explicitly configured by account owners.
+- Does not execute on-chain transactions without user approval, except for budget-scoped operations explicitly configured by account owners.
 - Does not send credentials to the MCP server or third parties during normal treasury operations. Admin export helpers exist for local diagnostic use.
 - Does not make network requests outside the endpoints listed above during runtime operations.
 
@@ -38,7 +38,7 @@ This skill may be invoked autonomously when the agent detects matching trigger c
 - Run `moltbank status` before debugging auth issues — it checks credentials, token validity, and active organization in one shot.
 - Use `discover_x402_bazaar` when the user wants to browse available x402 endpoints before choosing a URL. If the user already has a specific x402 URL, use it directly.
 - When the agent reports `AGENT_FROZEN`, do not retry — send the user to the dashboard to unfreeze.
-- For transfers, call `check_bot_allowances` first. If enough transfer allowance is available, offer the choice between instant execution with allowance and drafting a proposal for manual approval.
+- For transfers, call `check_bot_budget` first. If enough transfer budget is available, offer the choice between instant execution with budget and drafting a proposal for manual approval.
 - If `mcporter` returns connection errors, check that the MCP server URL resolves correctly — sandbox and production URLs differ.
 - The x402 signer wallet is local-only. Fund it with small amounts for individual purchases rather than pre-loading large balances.
-- Use `analyze_spending_patterns` before recommending batching or allowance changes — it provides data-backed projections the agent can reference.
+- Use `analyze_spending_patterns` before recommending batching or budget changes — it provides data-backed projections the agent can reference.

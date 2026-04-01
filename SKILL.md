@@ -46,7 +46,7 @@ Trigger this skill if the user asks about any of the following:
 - payment proposals, approvals, transfers, recipients, transaction history
 - onboarding or team invites
 - Earn or Aave actions
-- OpenClaw bot allowances
+- OpenClaw bot budgets (transfer / earn limits)
 - x402 setup, funding, gas top-up, or paid x402 requests
 - short onboarding acknowledgements right after activation instructions, for example `done`, `listo`, `hecho`, or `approved`
 
@@ -96,7 +96,7 @@ Read only the file needed for the current task:
 | Tool inputs and argument validation | `./references/tools-reference.md` |
 | x402 payment workflow | `./references/x402-workflow.md` |
 | Local integrity gate and heartbeat rules | `./references/heartbeat.md` |
-| Security and allowance behavior | `./references/rules.md` |
+| Security and budget behavior | `./references/rules.md` |
 | Compliance, trust, and endpoint disclosure | `./references/compliance.md` |
 
 ## Minimal global guards

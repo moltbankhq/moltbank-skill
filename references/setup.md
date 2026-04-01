@@ -400,7 +400,7 @@ $wrapper = "$env:USERPROFILE\.openclaw\workspace\skills\$env:MOLTBANK_SKILL_NAME
 ## 5. Required operating rules
 
 - For each write operation, confirm inputs and wait for explicit user approval.
-- If a tool returns `missing_allowance`/`insufficient_allowance`, do not retry blindly; guide user to the relevant proposal tool.
+- If a tool returns `missing_budget`/`insufficient_budget`, do not retry blindly; guide user to the relevant proposal tool.
 - Never output API keys or private keys.
 - Commands like `node ./scripts/init-openclaw-signer.mjs ...` and `node ./scripts/inspect-x402-requirements.mjs ...` are the same on Mac/Linux and Windows PowerShell once you are already in the skill directory.
 - For x402 signer bootstrap, use `node ./scripts/init-openclaw-signer.mjs "<safeAddress>"`. Never ask the user to edit `credentials.json` for `x402_signer_private_key`.

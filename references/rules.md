@@ -17,11 +17,11 @@ Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defau
 - All drafts require human signature via Passkey on the MoltBank dashboard.
 - When a draft or proposal is created, send the user to `/approval/<proposalId>` or the returned `approvalLink`. Do not use `/proposals/<proposalId>` as a UI route.
 
-### OpenClaw Exception (Allowance-Based)
+### OpenClaw Exception (Budget-Based)
 
-- OpenClaw agents may execute allowance-scoped on-chain actions via MCP tools when explicitly configured by account owners.
-- This includes standard USDC transfers using `useAllowance=true`, allowance-funded x402 wallet top-ups, allowance-based Earn position management, and x402 signer gas top-ups on Base.
-- Transfer interaction rule: if a user asks you to send funds, call `check_bot_allowances` first. If enough transfer allowance is available, offer the choice between instant execution with allowance and drafting a proposal for manual approval.
+- OpenClaw agents may execute budget-scoped on-chain actions via MCP tools when explicitly configured by account owners.
+- This includes standard USDC transfers using `useBudget=true`, budget-funded x402 wallet top-ups, budget-based Earn position management, and x402 signer gas top-ups on Base.
+- Transfer interaction rule: if a user asks you to send funds, call `check_bot_budget` first. If enough transfer budget is available, offer the choice between instant execution with budget and drafting a proposal for manual approval.
 - OpenClaw runtime must support local execution, or an equivalent local payment tool, for x402 proof signing.
 - For x402 purchases, OpenClaw must:
   1. fetch the Safe address first with `get_account_details`
@@ -33,12 +33,12 @@ Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defau
   7. check signer wallet balance first for every paid request and every retry; top up via `buy_x402_good` only when needed and default to the exact required amount unless the user explicitly asks to prefund more
   8. treat `buy_x402_good` as funding-only: it funds the signer wallet and may auto-attempt the default gas top-up, but it does not call the merchant and does not complete the purchase
   9. treat `buy_x402_good` as the first automatic gas checkpoint: after funding, it may auto-attempt the default gas top-up if signer ETH is still low
-  10. top up signer ETH gas via `propose_openclaw_x402_gas_topup` when needed. After `register_openclaw_x402_wallet` and a fresh Base transfer allowance, the tool should usually execute instantly because the LI.FI route is pre-authorized. Older allowances may still create proposals.
+  10. top up signer ETH gas via `propose_openclaw_x402_gas_topup` when needed. After `register_openclaw_x402_wallet` and a fresh Base transfer budget, the tool should usually execute instantly because the LI.FI route is pre-authorized. Older budgets may still create proposals.
   11. pay the x402 endpoint locally with the bot-held key using `@x402/fetch` and `@x402/evm`, preserving any required JSON POST body
   12. log each spend via `record_x402_payment_result` after every local payment attempt, sending the full local payment output when available. Include `paymentTxHash` only when the local script returns a real one.
   13. never use `buy_x402_good.fundingTxHash` or `buy_x402_good.gasTopUp.fundingTxHash` as `paymentTxHash`
-  14. keep x402 allowance funding and receipt logging on Base chain
-- For savings, spend optimization, or fee-reduction questions, call `analyze_spending_patterns` first. Use its weekly, monthly, and yearly projections, recurring-recipient cadence signals, and recipient or tag baseline comparisons before recommending batching transfers, moving to a recurring payout cadence, or increasing an OpenClaw allowance instead of repeating one-off sends.
+  14. keep x402 budget funding and receipt logging on Base chain
+- For savings, spend optimization, or fee-reduction questions, call `analyze_spending_patterns` first. Use its weekly, monthly, and yearly projections, recurring-recipient cadence signals, and recipient or tag baseline comparisons before recommending batching transfers, moving to a recurring payout cadence, or increasing an OpenClaw transfer budget instead of repeating one-off sends.
 - OpenClaw private keys must remain in bot runtime secrets and must not be sent to the MoltBank MCP server.
 - If the runtime returns `AGENT_FROZEN`, stop all actions, explain that the agent is frozen, and send the user to `/en/agents/<agentId>` so they can unfreeze it.
 
@@ -60,13 +60,13 @@ Use `APP_BASE_URL`, `MOLTBANK_CREDENTIALS_PATH`, and `MOLTBANK_SKILL_NAME` defau
 - If `resolve_entity` returns `type: "contact"`, use `propose_transaction`.
 - If `resolve_entity` returns `type: "unknown"`, ask the user to clarify or add the recipient first via `create_contact`.
 
-## 6. Allowance Memory and Proactive Tracking
+## 6. Budget Memory and Proactive Tracking
 
-- If you are asked to perform an operation requiring an allowance, such as Transfer, Earn, or x402, and you do not know your current limits, call `check_bot_allowances` first.
+- If you are asked to perform an operation requiring a budget, such as Transfer, Earn, or x402, and you do not know your current limits, call `check_bot_budget` first.
 - Maintain an internal ledger in scratchpad memory. Whenever a tool returns `remainingUsdc` and `nextResetAt`, update your internal ledger.
-- Do not use trial and error. Before calling any execution tool, such as `buy_x402_good` or `manage_earn_position`, calculate whether the requested amount is less than or equal to `remainingUsdc`. If not, stop and explain how much is left, then suggest `propose_openclaw_allowance`.
-- x402 setup ordering: for Base x402 usage, register the bot's signer wallet before creating the transfer allowance. That allowance also authorizes the Base LI.FI gas-top-up path tied to the bot's signer wallet.
-- If the current date or time is past the tracked `nextResetAt`, you may assume the allowance has reset to its full `limitUsdc`.
+- Do not use trial and error. Before calling any execution tool, such as `buy_x402_good` or `manage_earn_position`, calculate whether the requested amount is less than or equal to `remainingUsdc`. If not, stop and explain how much is left, then suggest `propose_openclaw_budget`.
+- x402 setup ordering: for Base x402 usage, register the bot's signer wallet before creating the transfer budget. That budget also authorizes the Base LI.FI gas-top-up path tied to the bot's signer wallet.
+- If the current date or time is past the tracked `nextResetAt`, you may assume the budget has reset to its full `limitUsdc`.
 
 ## 7. MCP CLI Syntax
 
