@@ -40,7 +40,7 @@ If any check fails:
 | 5    | Top up USDC only if needed    | Conditional                           | Check signer wallet USDC on every paid request and every retry before deciding to skip funding. Call **buy_x402_good** only if current balance is insufficient; default to the exact required amount, not a large prefund. After funding, it also auto-attempts the default gas top-up if signer ETH is still low. |
 | 6    | Check signer ETH gas          | Always                                | Call **check_openclaw_x402_gas_balance** to verify signer ETH before local payment execution (especially if Step 5 was skipped or auto-top-up could not complete).                                                                                                                                                 |
 | 7    | Ask user for gas top-up       | Conditional (`status: "low"`)         | Ask if user wants ETH gas top-up via LI.FI. Suggest default ~1 USDC (configurable), allow lower amount, and warn that future x402 payments may fail when gas runs out.                                                                                                                                             |
-| 8    | Execute or propose gas top-up | Conditional                           | Call **propose_openclaw_x402_gas_topup**. If the transfer allowance was created after **register_openclaw_x402_wallet**, it should already cover the LI.FI route and execute instantly. Older allowances still return ordered proposals (optional approval, LI.FI swap, then ETH transfer Safe -> signer).         |
+| 8    | Execute or propose gas top-up | Conditional                           | Call **propose_openclaw_x402_gas_topup**. If the transfer budget was created after **register_openclaw_x402_wallet**, it should already cover the LI.FI route and execute instantly. Older budgets still return ordered proposals (optional approval, LI.FI swap, then ETH transfer Safe -> signer).         |
 | 9    | Execute + receipt logging     | Always                                | Run the local payment script and then call **record_x402_payment_result** with the full local payment output. Include the payment tx hash when the merchant exposes one, but still log the attempt when it does not.                                                                                               |
 
 **Optimization:** For existing validated/registered wallets, usual path is **1 → 2 → 5 (often skipped after an actual signer USDC check) → 6 → 9**. Never skip Step 5 by assumption.
@@ -107,9 +107,9 @@ You may track wallet state in your local credentials file to decide when to run 
 ### Prerequisites
 
 - Authenticated session with MoltBank (credentials and active organization).
-- The account must have an approved OpenClaw **transfer** allowance (`propose_openclaw_allowance` with `transferLimitUSDC` > 0).
-- On Base, create that allowance only after **register_openclaw_x402_wallet** so the LI.FI gas-top-up route is pre-authorized for the bot's own signer wallet.
-- If **buy_x402_good** returns `missing_allowance` or `insufficient_allowance`, **STOP** and guide the user to create or approve an allowance before retrying.
+- The account must have an approved OpenClaw **transfer** budget (`propose_openclaw_budget` with `transferLimitUSDC` > 0).
+- On Base, create that budget only after **register_openclaw_x402_wallet** so the LI.FI gas-top-up route is pre-authorized for the bot's own signer wallet.
+- If **buy_x402_good** returns `missing_budget` or `insufficient_budget`, **STOP** and guide the user to create or approve a budget before retrying.
 
 ---
 
@@ -177,20 +177,20 @@ Treat the signer wallet as a petty-cash balance:
 1. Read signer wallet USDC balance on-chain.
 2. If balance is already enough for this specific request, **skip `buy_x402_good`**.
 3. Do not assume prior funding is still available. Re-run this signer USDC check for every retry and every new paid x402 URL. Each successful paid fetch may consume the exact purchase amount.
-4. If balance is insufficient and current remaining transfer allowance is not known, call `check_bot_allowances` first.
+4. If balance is insufficient and current remaining transfer budget is not known, call `check_bot_budget` first.
 5. If balance is insufficient, call **buy_x402_good** to top up.
    By default, use the **exact required amount from Step 2**. Do not prefund 10 USDC by default.
 6. **buy_x402_good is funding-only.** A `status: "funded"` response means the signer can attempt the local payment next. It does **not** mean the x402 purchase already succeeded.
-7. Only add a cushion when the user explicitly asks to prefund more, or when you already know the remaining allowance easily covers it. Never exceed known `remainingUsdc`.
-8. If known remaining allowance is below the amount you need, **STOP** and ask whether the user wants to raise allowance via `propose_openclaw_allowance`.
+7. Only add a cushion when the user explicitly asks to prefund more, or when you already know the remaining budget easily covers it. Never exceed known `remainingUsdc`.
+8. If known remaining budget is below the amount you need, **STOP** and ask whether the user wants to raise the transfer budget via `propose_openclaw_budget`.
 9. After funding, inspect the returned `gasTopUp` field:
    - `not_needed`: signer already had enough ETH
    - `funded`: default gas top-up also completed automatically
    - `proposed`: approval flow is still required before payment
-   - `insufficient_allowance`: signer is funded, but there was not enough remaining allowance for the default gas top-up
+   - `insufficient_budget`: signer is funded, but there was not enough remaining budget for the default gas top-up
 
-If **buy_x402_good** itself does not return `status: 'funded'`, **STOP** and resolve allowance/wallet issues first.
-If it returns `status: 'funded'` but `gasTopUp.result` is `proposed` or `insufficient_allowance`, do **not** continue to local payment until gas is resolved.
+If **buy_x402_good** itself does not return `status: 'funded'`, **STOP** and resolve budget/wallet issues first.
+If it returns `status: 'funded'` but `gasTopUp.result` is `proposed` or `insufficient_budget`, do **not** continue to local payment until gas is resolved.
 
 ---
 
@@ -224,7 +224,7 @@ Call **propose_openclaw_x402_gas_topup** with the selected amount.
 
 Expected behavior:
 
-- If the allowance was created after the signer wallet was registered, it should usually already cover the matching LI.FI route, so the tool executes instantly and sends ETH directly to the signer wallet.
+- If the transfer budget was created after the signer wallet was registered, it should usually already cover the matching LI.FI route, so the tool executes instantly and sends ETH directly to the signer wallet.
 - Otherwise it creates ordered approval proposals:
 - optional USDC approval for LI.FI spender (if needed)
 - LI.FI swap proposal: USDC -> ETH (Safe)

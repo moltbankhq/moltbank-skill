@@ -12,7 +12,7 @@ Let your agent fleet spend with guardrails. MoltBank gives AI agents scoped acce
 
 - Check USDC balances and account details across your organization
 - Draft payment proposals and route them for human approval
-- Execute transfers within pre-set allowance budgets
+- Execute transfers within pre-configured budgets
 - Track transaction history, cash flow, and spending patterns
 - Manage Earn positions on Aave
 - Discover, fund, and pay x402 endpoints on Base
@@ -45,9 +45,9 @@ moltbank setup
 
 ## How it works
 
-MoltBank connects your agent to a treasury MCP server. The agent reads USDC balances and transaction data directly. For anything that moves money — transfers, Earn deposits, x402 purchases — the agent either drafts a proposal for human approval or executes within a pre-configured allowance budget.
+MoltBank connects your agent to a treasury MCP server. The agent reads USDC balances and transaction data directly. For anything that moves money — transfers, Earn deposits, x402 purchases — the agent either drafts a proposal for human approval or executes within a pre-configured budget (transfer and earn limits).
 
-Allowances are set by account owners in the MoltBank dashboard. The agent checks its remaining budget before every operation and stops if the amount exceeds what's left. No surprise spend.
+Transfers and earn limits are set by account owners in the MoltBank dashboard. The agent checks its remaining budget before every operation and stops if the amount exceeds what's left. No surprise spend.
 
 The x402 workflow runs on Base. The agent manages a local signer wallet for on-chain payment signing — the private key stays on your machine.
 
@@ -67,7 +67,7 @@ SKILL.md                          → Agent entrypoint and execution policy
 references/
   setup.md                        → Install, auth, and runtime runbook
   onboarding.md                   → OAuth device flow
-  rules.md                        → Security, approvals, allowance behavior
+  rules.md                        → Security, approvals, budget behavior
   tools-reference.md              → Tool inputs and argument validation
   x402-workflow.md                → x402 payment workflow (Base)
   openclaw-signer-eoa.md          → Signer wallet bootstrap
