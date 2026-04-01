@@ -35,9 +35,9 @@ If the runtime sends an explicit instruction to read workspace `HEARTBEAT.md` (f
 - Do not ask the user for obvious environment information like OS; detect it from runtime.
 - Only request user action when strictly required (OAuth activation in browser, explicit policy approvals, or user-provided secrets).
 - Always send onboarding code/instructions in the user channel output. Never rely on the user watching gateway console logs.
-- Prefer the standalone `moltbank` CLI only for install, setup, auth-status, and repair flows. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
+- Prefer the standalone `npx @moltbankhq/openclaw setup` or `moltbank` CLI only for install, setup, auth-status, and repair flows. Use `openclaw moltbank ...` only as a compatibility fallback while plugin mode still exists.
 - For business operations such as balances, transfers, approvals, history, reports, and x402 actions, always use the skill wrapper scripts. Do not treat the standalone `moltbank` CLI as the treasury operations interface.
-- Use `moltbank setup` by default when the CLI is available..
+- Use `npx @moltbankhq/openclaw setup` by default or `moltbank setup` when the CLI is available.
 - In nonblocking mode, keep authentication progressing in the background so onboarding can complete even if a follow-up chat message is delayed.
 
 ### Join intent shortcut (mandatory)
@@ -48,11 +48,10 @@ Treat the user's join request as authorization to run install/setup commands in 
 
 Required sequence:
 
-1. If `moltbank` is not already available, install the CLI: `npm install -g @moltbankhq/openclaw`
-2. Run `moltbank setup`
+1. If `npx @moltbankhq/openclaw setup` doesn't work and if `moltbank` is not already available, install the CLI: `npm install -g @moltbankhq/openclaw`, then run `moltbank setup`
 3. **CRITICAL:** You MUST wait until setup completely finishes and exits. Do not proceed while it is still running.
 4. Read the final output to find the OAuth code/URL and relay it to the user in-channel.
-5. Only if the npm CLI path is unavailable or explicitly fails, use the compatibility bootstrap installer: `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
+5. Only if the npm CLI paths are unavailable or explicitly fails, use the compatibility bootstrap installer: `curl -fsSL "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh" | bash`
 
 Do not ask the user to choose between "setup / onboarding / explain capabilities" for this intent.
 
@@ -62,7 +61,7 @@ If the agent has just sent activation URL/code and the user replies with a short
 
 Required sequence in that same turn:
 
-1. Run `moltbank status` first. Use `moltbank auth-status` only if the standalone CLI is unavailable.
+1. Run `npx @moltbankhq/openclaw status` or `moltbank status` first. Use `moltbank auth-status` only if the standalone CLI is unavailable.
 2. If auth is still pending, run blocking setup to finalize token polling: `moltbank setup-blocking`.
 3. Report one of these outcomes in-channel (never stay silent):
    - Auth completed successfully (include active organization name if available).
@@ -74,7 +73,7 @@ Required sequence in that same turn:
 
 When a user says they approved but the bot did not continue, run this sequence:
 
-1. `moltbank status`
+1. `npx @moltbankhq/openclaw status` or `moltbank status`
 2. If status shows `pending code` and no credentials, run `moltbank setup-blocking`. Use the `openclaw` form only if the standalone CLI is unavailable.
 3. If no new inbound chat events appear in gateway logs after the user's reply, treat it as connector delivery failure (not MoltBank auth logic).
 4. Ask the user to send `MoltBank done` again after connector recovery, then re-run blocking setup.
@@ -90,11 +89,11 @@ Before claiming command execution is unavailable:
 Forbidden fallback when step 1 was not attempted:
 
 - "I can't run MoltBank setup commands directly in this environment."
-- "Run `moltbank setup` on your machine."
+- "Run `npx @moltbankhq/openclaw setup` or `moltbank setup` on your machine."
 
 ### Unknown subcommand handling (mandatory)
 
-If `moltbank setup` returns `error: unknown command 'moltbank'`, interpret it as "MoltBank plugin not installed in this OpenClaw runtime."
+If `npx @moltbankhq/openclaw setup` and `moltbank setup` returns `error: unknown command 'moltbank'`, interpret it as "MoltBank plugin not installed in this OpenClaw runtime."
 
 Required recovery sequence in the same run:
 
@@ -111,6 +110,8 @@ Forbidden early-stop response for this case:
 
 - "The `moltbank` subcommand is unknown, so I can't continue."
 - "Please install MoltBank support and tell me when done."
+- "I don't have Exec permissions."
+- "I don't have elevated permissions."
 
 ### Local skill path discovery (mandatory)
 
@@ -126,7 +127,7 @@ Required sequence:
 3. If local docs are still missing, run install/recovery flow immediately, then retry local reads.
 4. Never stop with "can't find references/setup.md". Never ask "If you want, I can keep going..."; continue automatically and report the outcome.
 
-### URL handling for `https://app.moltbank.bot/SKILL.md`
+### URL handling for `https://app.moltbank.bot/skill/SKILL.md`
 
 When the user references this URL, use local installed skill docs as operational truth first:
 
@@ -148,17 +149,17 @@ Required tools:
 
 If the plugin is not installed yet, use one of these supported methods:
 
-Recommended (preferred reproducible CLI path):
+Recommended:
 
 ```bash
-npm install -g @moltbankhq/openclaw
-moltbank setup
+npx @moltbankhq/openclaw setup
 ```
 
 Or without a global install:
 
 ```bash
-npx @moltbankhq/openclaw setup
+npm install -g @moltbankhq/openclaw
+moltbank setup
 ```
 
 Compatibility bootstrap (remote installer; use only when the npm CLI path is unavailable):
