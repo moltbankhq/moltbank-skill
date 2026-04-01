@@ -85,6 +85,8 @@ When executing tools via the wrapper script, use strict `key=value` or `key="val
 - If `list` output mentions `MOLTBANK` header substitution, do not request token setup immediately. First read `${MOLTBANK_CREDENTIALS_PATH}` and verify `active_organization`.
 - If an MCP call or proxy response includes `AGENT_FROZEN`, do not retry the action. Tell the user to unfreeze from `/en/agents/<agentId>` first.
 
-## 9. Output Control
+## 9. Output and Style Boundary
 
-- Unless explicitly requested by the user, do not display raw tool outputs, internal logs, or verbose execution details. Focus on concise summaries and actionable information.
+- Do not expose secrets (tokens, API keys, private keys, or unredacted credentials) in user-visible output.
+- Communication style (for example concise vs detailed, tone, and formatting preferences) is owned by the core OpenClaw agent profile, not by this skill.
+- Keep this skill focused on operational policy, safety, and tool-execution behavior.

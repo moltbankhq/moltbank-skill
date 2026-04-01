@@ -124,7 +124,7 @@ Required sequence:
    - Mac/Linux: `find "${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}/skills" -maxdepth 3 -type f -path "*/references/setup.md" | grep -i "/moltbank/" | head -1`
    - Windows (PowerShell): `Get-ChildItem "$env:USERPROFILE\\.openclaw\\workspace\\skills" -Recurse -Filter setup.md | Where-Object { $_.FullName -match '(?i)\\\\moltbank\\\\references\\\\setup\.md$' } | Select-Object -First 1 -ExpandProperty FullName`
 3. If local docs are still missing, run install/recovery flow immediately, then retry local reads.
-4. Never stop with "can't find references/setup.md". Never ask "If you want, I can keep going..."; continue automatically and report concrete progress.
+4. Never stop with "can't find references/setup.md". Never ask "If you want, I can keep going..."; continue automatically and report the outcome.
 
 ### URL handling for `https://app.moltbank.bot/SKILL.md`
 

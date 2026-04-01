@@ -64,7 +64,7 @@ When local repair is needed, show:
 
 - missing or broken files
 - manifest path mismatches
-- a short summary of the local repair performed
+- a summary of the local repair performed
 
 ### 0.5 Local repair flow
 
