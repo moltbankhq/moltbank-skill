@@ -2,13 +2,12 @@
 // SECURITY MANIFEST:
 //   Environment variables accessed: MOLTBANK_CREDENTIALS_PATH, APP_BASE_URL,
 //     MOLTBANK_SKILL_NAME, OPENCLAW_WORKSPACE, HOME (only)
-//   External endpoints called: ${APP_BASE_URL}/api/auth/device/token (only)
+//   External endpoints called: ${APP_BASE_URL}/api/oauth/token (only)
 //   Local files read: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json
 //   Local files written: ${MOLTBANK_CREDENTIALS_PATH}/credentials.json (token save)
 
-import fs from 'fs';
-import path from 'path';
 import { resolveAppBaseUrl, resolveCredentialsPath } from './openclaw-runtime-config.mjs';
+import { readCredentialsFile, writeCredentialsFile } from './credentials-store.mjs';
 
 const rawArgs = process.argv.slice(2);
 const positionalArgs = [];
@@ -62,13 +61,8 @@ function nowIso() {
 }
 
 function loadCredentials(filePath) {
-  if (!fs.existsSync(filePath)) {
-    return { organizations: [], active_organization: '' };
-  }
-
   try {
-    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    return parsed && typeof parsed === 'object' ? parsed : { organizations: [], active_organization: '' };
+    return readCredentialsFile(filePath);
   } catch (error) {
     fail('Could not parse credentials.json while saving OAuth token.', {
       credentialsPath: filePath,
@@ -111,8 +105,7 @@ function saveTokenToCredentials(payload) {
 
   credentials.active_organization = organizationName;
 
-  fs.mkdirSync(path.dirname(credentialsPath), { recursive: true });
-  fs.writeFileSync(credentialsPath, `${JSON.stringify(credentials, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
+  writeCredentialsFile(credentialsPath, credentials, { mode: 0o600 });
 
   return {
     organizationName,

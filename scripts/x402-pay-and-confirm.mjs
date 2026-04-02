@@ -28,8 +28,9 @@
  * Dependencies @x402/fetch, @x402/evm, and viem must be installed (npm install or pnpm install).
  */
 
-import fs from 'fs';
+import { readCredentialsFileIfExists } from './credentials-store.mjs';
 import { resolveCredentialsPath, resolveCredentialsPathHint } from './openclaw-runtime-config.mjs';
+import { readPrivateKeyFromEnv, readX402JsonBodyFromEnv } from './x402-input-env.mjs';
 
 const x402Url = process.argv[2];
 const method = (process.argv[3] || 'GET').toUpperCase();
@@ -105,14 +106,13 @@ async function main() {
   }
 
   // Try to get private key from env first, then from credentials file
-  let rawKey = process.env.PRIVATE_KEY;
+  let rawKey = readPrivateKeyFromEnv();
 
   if (!rawKey) {
     try {
       const credentialsPath = resolveCredentialsPath();
-
-      if (fs.existsSync(credentialsPath)) {
-        const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+      const credentials = readCredentialsFileIfExists(credentialsPath);
+      if (credentials) {
         const activeOrg = credentials.organizations?.find((org) => org.name === credentials.active_organization);
         rawKey = activeOrg?.x402_signer_private_key;
         log('Using private key from credentials file for organization:', credentials.active_organization);
@@ -131,7 +131,7 @@ async function main() {
   }
 
   const privateKey = rawKey.startsWith('0x') ? rawKey : `0x${rawKey}`;
-  const rawRequestBody = rawRequestBodyArg ?? process.env.X402_JSON_BODY;
+  const rawRequestBody = rawRequestBodyArg ?? readX402JsonBodyFromEnv();
 
   if (rawRequestBody != null && (method === 'GET' || method === 'HEAD')) {
     output({
