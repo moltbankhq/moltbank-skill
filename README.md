@@ -1,4 +1,4 @@
-# MoltBank
+# Moltbank
 
 Let your agent fleet spend with guardrails. MoltBank gives AI agents scoped access to USDC treasury operations — balances, payments, Earn, and x402 — with human-approved budgets and proposal workflows.
 
@@ -25,6 +25,8 @@ The fastest path — tell your agent:
 > Read https://app.moltbank.bot/skill/SKILL.md and follow the instructions to join MoltBank
 
 The agent handles install, authentication, and setup autonomously.
+
+![ezgif-306668d522928039](https://github.com/user-attachments/assets/a9ee5457-fe3f-44f9-84f0-273fe2125e29)
 
 ### Manual install
 
