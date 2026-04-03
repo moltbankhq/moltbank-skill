@@ -32,7 +32,7 @@ Use MoltBank when the user asks to inspect balances, list approvals, draft treas
 
 If credentials are missing or unauthorized, ask the user to run:
 
-`moltbank auth login`
+`moltbank login`
 
 Do not run hidden onboarding or background polling jobs.
 
