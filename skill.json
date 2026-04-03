@@ -1,43 +1,19 @@
 {
   "name": "moltbank",
-  "version": "0.1.0",
-  "description": "Let your agent fleet spend with guardrails. Manage USDC treasury, payments, Earn positions, and x402 purchases — set budgets for agents, draft proposals, approve transfers, and track spend without leaving your agent.",
+  "version": "2.0.0",
+  "description": "MoltBank skill with CLI-first + optional local MCP bridge guidance.",
   "homepage": "https://app.moltbank.bot",
   "entrypoint": "SKILL.md",
-  "install": {
-    "script": "${APP_BASE_URL:-https://app.moltbank.bot}/install.sh",
-    "targetDir": "${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}/skills/${MOLTBANK_SKILL_NAME:-MoltBank}"
-  },
   "requirements": {
-    "bins": ["mcporter", "jq"],
-    "node": ">=20.0.0",
-    "npm": [
-      "@x402/fetch@2.3.0",
-      "@x402/evm@2.3.1",
-      "viem@2.46.0"
-    ],
-    "env": ["MOLTBANK"]
-  },
-  "paths": {
-    "mcporterConfig": "assets/mcporter.json",
-    "wrapperScript": "scripts/moltbank.sh",
-    "wrapperScriptWindows": "scripts/moltbank.ps1",
-    "oauthDeviceCodeScript": "scripts/request-oauth-device-code.mjs",
-    "oauthExportApiKeyScript": "scripts/export-api-key.mjs",
-    "x402SignerInitScript": "scripts/init-openclaw-signer.mjs",
-    "x402InspectScript": "scripts/inspect-x402-requirements.mjs",
-    "oauthTokenPollScript": "scripts/poll-oauth-token.mjs",
-    "x402PaymentScript": "scripts/x402-pay-and-confirm.mjs"
+    "bins": ["moltbank"],
+    "node": ">=22.0.0"
   },
   "mcpServers": {
     "MoltBank": {
-      "description": "MoltBank stablecoin treasury MCP server powered by Fondu",
-      "transport": "sse",
-      "url": "${APP_BASE_URL:-https://app.moltbank.bot}/api/mcp",
-      "headers": {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer ${MOLTBANK}"
-      }
+      "description": "Local MoltBank stdio MCP bridge",
+      "transport": "stdio",
+      "command": "moltbank",
+      "args": ["mcp", "stdio"]
     }
   }
 }

@@ -1,111 +1,51 @@
 ---
 name: moltbank
-description: Let your agent fleet spend with guardrails. Manage USDC treasury, payments, Earn positions, and x402 purchases — set budgets for agents, draft proposals, approve transfers, and track spend without leaving your agent.
+description: Manage treasury balances, payment drafts, approvals, and x402 actions through the MoltBank CLI or local MCP bridge.
 homepage: https://app.moltbank.bot
 metadata:
   category: finance
-  version: 0.1.0
-  api_base: https://app.moltbank.bot/api/mcp
-  install_script: https://app.moltbank.bot/install.sh
-  clawdbot:
-    emoji: "🏦"
-    requires:
-      env: ["MOLTBANK"]
-      anyBins: ["mcporter", "jq"]
-      npm:
-        - '@x402/fetch@2.3.0'
-        - '@x402/evm@2.3.1'
-        - 'viem@2.46.0'
-    primaryEnv: MOLTBANK
-    files: ["scripts/*", "references/*", "assets/*"]
+  version: 2.0.0
   openclaw:
-    emoji: "🏦"
     requires:
-      env: ["MOLTBANK"]
-      bins:
-        - mcporter
-        - jq
-      npm:
-        - '@x402/fetch@2.3.0'
-        - '@x402/evm@2.3.1'
-        - 'viem@2.46.0'
-    primaryEnv: MOLTBANK
-    files: ["scripts/*", "references/*", "assets/*"]
+      bins: ["moltbank"]
 ---
 
-# MoltBank skill for AI agents
+# MoltBank Skill For AI Agents
 
-Use this skill whenever the user asks to do stablecoin treasury actions through MoltBank.
+Use MoltBank when the user asks to inspect balances, list approvals, draft treasury payments, or interact with x402 endpoints.
 
-## Trigger conditions
+## Preferred Execution Order
 
-Trigger this skill if the user asks about any of the following:
+1. If a local MoltBank MCP server is already configured, use its tools.
+2. Otherwise use the MoltBank CLI with `--json`.
 
-- MoltBank or app.moltbank.bot
-- treasury balances, USDC holdings, accounts, or cash flow
-- payment proposals, approvals, transfers, recipients, transaction history
-- onboarding or team invites
-- Earn or Aave actions
-- OpenClaw bot budgets (transfer / earn limits)
-- x402 setup, funding, gas top-up, or paid x402 requests
-- short onboarding acknowledgements right after activation instructions, for example `done`, `listo`, `hecho`, or `approved`
+## CLI Examples
 
-## Agent execution policy (critical)
+- `moltbank balance --org "Organization Name" --json`
+- `moltbank approvals list --json`
+- `moltbank mcp call --tool propose_transaction --arg organizationName="Org Name" --arg accountName="Main" --arg amount=500 --json`
+- `moltbank mcp call --tool discover_x402_bazaar --arg limit=5 --json`
 
-- Execute required install, setup, and tool commands yourself when tools are available.
-- Do not ask the user to run commands that you can run directly.
-- Do not ask the user for obvious environment facts such as OS.
-- Only ask the user for input when it is truly required and cannot be derived or executed locally, for example OAuth browser approval, missing secrets the user must provide, or explicit policy approval.
-- For onboarding, always surface activation instructions and codes directly in the user channel. Never require the user to watch gateway console logs.
-- Prefer the standalone `moltbank` CLI for install, setup, auth status, and repair flows when it is available. Use `openclaw moltbank ...` only as a compatibility fallback.
-- For treasury operations such as balances, transfers, approvals, history, reports, and x402 actions, always use the installed skill wrapper scripts, not the standalone `moltbank` CLI.
-- After setup completes, verify operational readiness with a wrapper balance read for the active organization before claiming the agent is ready to use.
-- Never pause setup to ask whether local skill files should be updated; perform required local repairs automatically when possible.
+## Authentication
 
-## Source of truth by file
+If credentials are missing or unauthorized, ask the user to run:
 
-- `references/setup.md` is the canonical setup, install, auth, and runtime runbook.
-- `references/onboarding.md` is the canonical OAuth device flow document.
-- `references/rules.md` is the canonical security and approval policy document.
-- `references/x402-workflow.md` is the canonical x402 execution workflow.
-- `references/compliance.md` is the canonical trust disclosure, endpoint inventory, and operational boundaries document.
+`moltbank auth login`
 
-Keep this file high level. Put command-heavy setup instructions in `references/setup.md`, not here.
+Do not run hidden onboarding or background polling jobs.
 
-## Join behavior (critical)
+## Boundaries
 
-- If user intent is `join MoltBank`, execute setup immediately without clarification prompts.
-- Treat the user's join request as authorization to run install and setup commands in the current runtime.
-- Read `references/setup.md` before running join commands so the full install and auth sequence is applied.
-- Never reply with `I can't run setup commands in this environment` unless command execution has been attempted and failed in this run.
-- If `moltbank setup` returns `unknown command 'moltbank'`, treat it as `plugin not installed` and continue with the install flow from `references/setup.md`.
-- Inline fallback for unknown subcommand: install the MoltBank CLI via npm first (`npm install -g @moltbankhq/openclaw` or `npm exec --package @moltbankhq/openclaw -- moltbank setup`). Use the remote installer only when the npm CLI path is unavailable.
-- If command execution tools are unavailable, state that limitation directly and ask only for enabling command execution capability.
-- After sending an activation code, setup should continue automatically after browser approval. No manual CLI step is required from the user.
-- If the user replies with a short acknowledgment after activation steps, treat it as a command to check progress and continue.
+- Do not edit global OpenClaw configuration.
+- Do not mutate sandbox defaults.
+- Do not install software unless the user explicitly asks.
+- Keep secrets local; never print full tokens or private keys.
 
-## Progressive disclosure
+## Write Operations
 
-Read only the file needed for the current task:
-
-| Task | File |
-| :--- | :--- |
-| Setup, credentials, and session prep | `./references/setup.md` |
-| x402 signer wallet bootstrap | `./references/openclaw-signer-eoa.md` |
-| First-time device flow and onboarding | `./references/onboarding.md` |
-| Tool inputs and argument validation | `./references/tools-reference.md` |
-| x402 payment workflow | `./references/x402-workflow.md` |
-| Local integrity gate and heartbeat rules | `./references/heartbeat.md` |
-| Security and budget behavior | `./references/rules.md` |
-| Compliance, trust, and endpoint disclosure | `./references/compliance.md` |
-
-## Minimal global guards
-
-- Run the integrity gate in `./references/heartbeat.md` before every MoltBank MCP action.
-- Use the platform wrapper script for MCP calls, `scripts/moltbank.sh` on Mac/Linux and `scripts/moltbank.ps1` on Windows. Do not call `mcporter` directly.
-- For write operations such as draft, propose, register, fund, buy, update, or delete, confirm inputs and wait for explicit approval.
-- Never print API keys, access tokens, or private keys.
-
-## Version history
-
-- 0.1.0 — Initial publicly available version.
+Before write operations (payment drafts, approvals, execution), confirm key inputs:
+- organization
+- account
+- recipient
+- amount
+- chain (if applicable)
