@@ -75,12 +75,14 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 
 | Variable | Purpose | Default |
 | :--- | :--- | :--- |
-| `APP_BASE_URL` | MoltBank server URL | `https://app.moltbank.bot` |
+| `MOLTBANK_CUSTOM_API_URL` | Optional non-production API URL override for explicit preview/dev testing | unset (production URL is used) |
 | `MOLTBANK_CREDENTIALS_PATH` | Local credentials file path | `~/.MoltBank/credentials.json` |
 
 ## Security
 
 Credentials and signer material stay local on the machine. The agent should not mutate global OpenClaw config or sandbox settings as part of normal usage.
+
+For CLI routing safety, production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
 ## Links
 
