@@ -97,8 +97,7 @@ function normalizeProjectFlavor(flavor) {
 }
 
 export function resolveAppBaseUrl() {
-  const raw =
-    getConfigValue('APP_BASE_URL') || getConfigValue('FONDU_SKILL_BASE_URL') || getConfigValue('FONDU_BASE_URL') || DEFAULT_APP_BASE_URL;
+  const raw = getConfigValue('APP_BASE_URL') || DEFAULT_APP_BASE_URL;
   return normalizeBaseUrl(raw);
 }
 

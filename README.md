@@ -68,8 +68,7 @@ _Screenshots coming soon._
 
 ```
 SKILL.md                      → Minimal agent guidance (CLI/MCP-first)
-references/                   → Legacy docs retained for migration context
-scripts/                      → Legacy helper scripts retained for migration context
+scripts/                      → Local helper scripts used by the skill
 ```
 
 ## Environment variables
