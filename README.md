@@ -68,7 +68,7 @@ _Screenshots coming soon._
 
 ```
 SKILL.md                      → Minimal agent guidance (CLI/MCP-first)
-scripts/                      → Local helper scripts used by the skill
+skill.json                    → Skill metadata + local MCP stdio declaration
 ```
 
 ## Environment variables

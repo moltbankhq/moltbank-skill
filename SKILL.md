@@ -24,7 +24,9 @@ Use MoltBank when the user asks to inspect balances, list approvals, draft treas
 - `moltbank balance --org "Organization Name" --json`
 - `moltbank approvals list --json`
 - `moltbank mcp call --tool propose_transaction --arg organizationName="Org Name" --arg accountName="Main" --arg amount=500 --json`
-- `moltbank mcp call --tool discover_x402_bazaar --arg limit=5 --json`
+- `moltbank x402 signer init --json`
+- `moltbank x402 inspect --url "https://api.example.com/protected" --json`
+- `moltbank x402 pay --url "https://api.example.com/protected" --method GET --json`
 
 ## Authentication
 
