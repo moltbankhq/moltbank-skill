@@ -41,6 +41,16 @@ or local MCP mode:
 moltbank mcp stdio
 ```
 
+### Local web app target
+
+When running your web app repo locally (for example `pnpm dev`), point CLI traffic to localhost:
+
+```bash
+export MOLTBANK_CUSTOM_API_URL="http://localhost:3000"
+moltbank login
+moltbank doctor --json
+```
+
 ### Requirements
 
 - Node.js 22+
