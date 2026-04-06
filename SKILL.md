@@ -36,6 +36,17 @@ If credentials are missing or unauthorized, ask the user to run:
 
 Do not run hidden onboarding or background polling jobs.
 
+## Installation (Only When Explicitly Requested)
+
+If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
+
+`npm install -g @moltbankhq/cli`
+
+Then validate:
+
+- `moltbank login`
+- `moltbank doctor --json`
+
 ## Boundaries
 
 - Do not edit global OpenClaw configuration.
