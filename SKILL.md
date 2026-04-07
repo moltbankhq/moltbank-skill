@@ -33,6 +33,7 @@ Use MoltBank for:
 
 Do not guess flags, argument names, or tool input shapes from memory.
 Always discover exact usage on demand from MCP tool schemas or CLI schema/help.
+When using `moltbank schema --json`, use command `name` for CLI execution. Do not execute `id` values (for example `moltbank_*`) as terminal commands.
 
 When the user asks "what tools/functions can I use", run `moltbank tools list --json` and answer from that output.
 
