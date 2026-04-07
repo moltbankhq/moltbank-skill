@@ -51,7 +51,8 @@ moltbank mcp stdio
 This skill is intentionally thin:
 
 - The product surface is the local `moltbank` CLI.
-- Agents consume MoltBank through `--json` CLI commands or `moltbank mcp stdio`.
+- Agents consume MoltBank through MCP tools first (`moltbank mcp stdio`) and CLI second.
+- If MCP is unavailable, agents should discover exact command shape via `moltbank schema --json` / `moltbank schema <command> --json` before execution.
 - Authentication is chat-driven via `moltbank auth begin --json` followed by `moltbank auth poll --json` after browser approval.
 - Local credentials and signer material stay local.
 
