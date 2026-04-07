@@ -13,6 +13,7 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 - Check USDC balances and account details across your organization
 - Draft payment proposals and route them for human approval
 - List pending approvals
+- Discover x402 Bazaar endpoints and run one-shot x402 auto-pay
 - Track transaction history, cash flow, and spending patterns
 - Call backend MCP tools from CLI with typed JSON output
 - Use a local stdio MCP bridge for structured agent tool calls

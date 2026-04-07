@@ -17,7 +17,7 @@ Use MoltBank for:
 - treasury balance reads
 - pending approval reads
 - payment drafting
-- x402 signer/inspect/pay actions
+- x402 discovery and one-shot auto-pay actions
 
 ## Preferred Execution Order
 
@@ -53,6 +53,17 @@ You must guide the user through login in the chat:
 Do not rely on model memory to remember the device code. The CLI manages pending auth state locally.
 
 Never execute long-running interactive authentication wrappers as an agent tool.
+
+## x402 Payments
+
+When the user asks to buy or use an x402-protected endpoint:
+
+1. If the exact x402 URL is known, use `moltbank_x402_auto_pay`.
+2. If the URL is not known, use `moltbank_discover_x402_bazaar` first, then use `moltbank_x402_auto_pay`.
+3. Do not manually orchestrate signer init, wallet registration, inspect, treasury funding, payment execution, or receipt logging. `moltbank_x402_auto_pay` handles those steps.
+4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop.
+5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
+6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
 
 ## Installation (Only When Explicitly Requested)
 
