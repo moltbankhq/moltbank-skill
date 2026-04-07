@@ -23,6 +23,7 @@ Use MoltBank for:
 
 1. If MCP tools are available, use MCP first.
 2. If MCP tools are unavailable, discover exact CLI contract first:
+   - `moltbank tools list --json`
    - `moltbank schema --json`
    - `moltbank schema <command> --json`
    - or command `--help`
@@ -32,6 +33,8 @@ Use MoltBank for:
 
 Do not guess flags, argument names, or tool input shapes from memory.
 Always discover exact usage on demand from MCP tool schemas or CLI schema/help.
+
+When the user asks "what tools/functions can I use", run `moltbank tools list --json` and answer from that output.
 
 # Authentication (Chat-Driven Flow)
 
