@@ -28,23 +28,33 @@ Use MoltBank when the user asks to inspect balances, list approvals, draft treas
 - `moltbank x402 inspect --url "https://api.example.com/protected" --json`
 - `moltbank x402 pay --url "https://api.example.com/protected" --method GET --json`
 
-## Authentication
+## Authentication (Chat-Driven Flow)
 
-If credentials are missing or unauthorized, ask the user to run:
+If credentials are missing or unauthorized, DO NOT ask the user to use the terminal.
 
-`moltbank login`
+You must guide the user through login in the chat:
 
-Do not run hidden onboarding or background polling jobs.
+1. Run `moltbank auth begin --json`.
+2. Extract `verification_uri_complete` and `user_code` from the JSON output.
+3. Present the clickable approval URL to the user in the chat.
+4. Ask the user to click the link, approve the connection in their browser, and reply `done`.
+5. When the user replies `done`, run `moltbank auth poll --json`.
+6. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
+7. If the command succeeds, continue with the user’s original request.
+
+Do not rely on model memory to remember the device code. The CLI manages pending auth state locally.
+
+Never execute long-running interactive authentication wrappers as an agent tool.
 
 ## Installation (Only When Explicitly Requested)
 
 If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
 
-`npm install -g @moltbankhq/cli`
+`npm install -g @megalinker/mbcli`
 
 Then validate:
 
-- `moltbank login`
+- `moltbank auth begin --json`
 - `moltbank doctor --json`
 
 ## Boundaries

@@ -19,11 +19,11 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 
 ## Quick start
 
-Install the CLI and run explicit human auth:
+Install the CLI and verify the agent-safe auth path:
 
 ```bash
-npm install -g @moltbankhq/cli
-moltbank login
+npm install -g @megalinker/mbcli
+moltbank auth begin --json
 moltbank doctor --json
 ```
 
@@ -52,7 +52,7 @@ This skill is intentionally thin:
 
 - The product surface is the local `moltbank` CLI.
 - Agents consume MoltBank through `--json` CLI commands or `moltbank mcp stdio`.
-- Authentication is an explicit user action via `moltbank login`.
+- Authentication is chat-driven via `moltbank auth begin --json` followed by `moltbank auth poll --json` after browser approval.
 - Local credentials and signer material stay local.
 
 This design avoids invasive installer behavior and global host mutation.
