@@ -82,6 +82,18 @@ For raw fallback calls, `moltbank mcp call` supports:
 - `--arg key=value` (repeatable)
 - `--body '{"key":"value"}'` (JSON object for tool arguments)
 
+## Export History Delivery
+
+`export_transaction_history` supports delivery channels:
+- `slack` (default for Slack context)
+- `telegram` (requires `telegramChatId`)
+- `inline` (returns file payload in tool response; default for non-Slack contexts)
+
+CLI flags:
+- `--delivery-channel slack|telegram|inline`
+- `--telegram-chat-id <id>` (required when channel is telegram)
+- `--slack-user-id <id>` (optional for Slack delivery outside Slack context)
+
 ## Installation (Only When Explicitly Requested)
 
 If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
