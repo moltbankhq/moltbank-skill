@@ -65,7 +65,7 @@ When the user asks to buy or use an x402-protected endpoint:
 4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. If `bootstrapBudget.approvalUrl` is present, provide that exact link and tell the user to approve it, then rerun the same auto-pay request.
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
-7. If auto-pay returns gas top-up proposals, offer a future autonomy fix: register x402 wallet first, then propose/update transfer budget so LI.FI x402 gas routes are pre-authorized (`hasX402Preauthorization=true`).
+7. If auto-pay returns a bootstrapBudget.approvalUrl, present that exact link to the user and tell them to approve it to grant the bot the necessary permissions. Once they approve it, rerun the exact same auto-pay command.
 
 ## Installation (Only When Explicitly Requested)
 
