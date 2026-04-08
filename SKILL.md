@@ -67,6 +67,21 @@ When the user asks to buy or use an x402-protected endpoint:
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
 7. If auto-pay returns a bootstrapBudget.approvalUrl, present that exact link to the user and tell them to approve it to grant the bot the necessary permissions. Once they approve it, rerun the exact same auto-pay command.
 
+## Budget Proposals On Base (Important)
+
+When creating a Base bot budget (`propose_openclaw_budget` / `moltbank budget propose`) and the backend says the x402 wallet is not registered:
+
+1. Run `moltbank x402 signer init --json` to obtain/reuse the bot wallet address.
+2. Run `moltbank x402 wallet register --wallet-address "<signerAddress>" --json`.
+3. Retry the original budget proposal exactly once.
+4. If it still fails, stop and report the blocker to the user with the exact error.
+
+Do not enter retry loops. Never repeat the same failing command more than 2 times without new inputs or state changes.
+
+For raw fallback calls, `moltbank mcp call` supports:
+- `--arg key=value` (repeatable)
+- `--body '{"key":"value"}'` (JSON object for tool arguments)
+
 ## Installation (Only When Explicitly Requested)
 
 If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
