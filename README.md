@@ -1,57 +1,61 @@
-# Moltbank
+# MoltBank
 
-Let your agent fleet spend with guardrails. MoltBank gives AI agents scoped access to USDC treasury operations — balances, payments, Earn, and x402 — with human-approved budgets and proposal workflows.
+MoltBank gives agents a safe treasury interface using a canonical local CLI plus an optional local MCP bridge.
 
 <!-- TODO: uncomment when ClawHub listing is live
 [![ClawHub](https://img.shields.io/badge/ClawHub-moltbank-blue)](https://clawhub.ai/skills/moltbank)
 -->
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-MIT--0-brightgreen)](LICENSE)
 
 ## What your agent can do
 
 - Check USDC balances and account details across your organization
 - Draft payment proposals and route them for human approval
-- Execute transfers within pre-configured budgets
+- List pending approvals
+- Discover x402 Bazaar endpoints and run one-shot x402 auto-pay
 - Track transaction history, cash flow, and spending patterns
-- Manage Earn positions on Aave
-- Discover, fund, and pay x402 endpoints on Base
-- Invite team members and manage contacts
+- Call backend MCP tools from CLI with typed JSON output
+- Use a local stdio MCP bridge for structured agent tool calls
 
 ## Quick start
 
-The fastest path — tell your agent:
-
-> Read https://app.moltbank.bot/skill/SKILL.md and follow the instructions to join MoltBank
-
-The agent handles install, authentication, and setup autonomously.
-
-![ezgif-306668d522928039](https://github.com/user-attachments/assets/a9ee5457-fe3f-44f9-84f0-273fe2125e29)
-
-### Manual install
-
-If you prefer to set it up yourself:
+Install the CLI and verify the agent-safe auth path:
 
 ```bash
-npm install -g @moltbankhq/openclaw
-moltbank setup
+npm install -g @megalinker/mbcli
+moltbank auth begin --json
+moltbank doctor --json
 ```
 
-`moltbank setup` walks you through authentication via OAuth device flow and configures the skill in your workspace.
+Then use either:
+
+```bash
+moltbank balance --org "Acme" --json
+```
+
+or local MCP mode:
+
+```bash
+moltbank mcp stdio
+```
 
 ### Requirements
 
-- Node.js 20+
-- `mcporter` — MCP transport CLI
-- `jq` — JSON processing
+- Node.js 22+
+- `moltbank` CLI available on PATH
 
 ## How it works
 
-MoltBank connects your agent to a treasury MCP server. The agent reads USDC balances and transaction data directly. For anything that moves money — transfers, Earn deposits, x402 purchases — the agent either drafts a proposal for human approval or executes within a pre-configured budget (transfer and earn limits).
+This skill is intentionally thin:
 
-Transfers and earn limits are set by account owners in the MoltBank dashboard. The agent checks its remaining budget before every operation and stops if the amount exceeds what's left. No surprise spend.
+- The product surface is the local `moltbank` CLI.
+- Agents consume MoltBank through MCP tools first (`moltbank mcp stdio`) and CLI second.
+- If MCP is unavailable, agents should discover exact command/tool shape via `moltbank tools list --json`, `moltbank schema --json`, and `moltbank schema <command> --json` before execution.
+- Authentication is chat-driven via `moltbank auth begin --json` followed by `moltbank auth poll --json` after browser approval.
+- Local credentials and signer material stay local.
 
-The x402 workflow runs on Base. The agent manages a local signer wallet for on-chain payment signing — the private key stays on your machine.
+This design avoids invasive installer behavior and global host mutation.
 
 ## Screenshots
 
@@ -60,49 +64,27 @@ The x402 workflow runs on Base. The agent manages a local signer wallet for on-c
 <!-- ![Agent setup flow](docs/screenshots/agent-setup.png) -->
 <!-- ![x402 payment](docs/screenshots/x402-payment.png) -->
 
-*Screenshots coming soon.*
+_Screenshots coming soon._
 
 ## Skill structure
 
 ```
-SKILL.md                          → Agent entrypoint and execution policy
-references/
-  setup.md                        → Install, auth, and runtime runbook
-  onboarding.md                   → OAuth device flow
-  rules.md                        → Security, approvals, budget behavior
-  tools-reference.md              → Tool inputs and argument validation
-  x402-workflow.md                → x402 payment workflow (Base)
-  openclaw-signer-eoa.md          → Signer wallet bootstrap
-  heartbeat.md                    → Integrity checks before MCP actions
-  compliance.md                   → Trust disclosure and endpoint inventory
-scripts/
-  moltbank.sh / moltbank.ps1      → MCP wrapper (Mac/Linux / Windows)
-  request-oauth-device-code.mjs   → OAuth initiation
-  poll-oauth-token.mjs            → OAuth token polling
-  export-api-key.mjs              → Token export (admin use)
-  init-openclaw-signer.mjs        → x402 signer key generation
-  inspect-x402-requirements.mjs   → x402 pre-purchase inspection
-  x402-pay-and-confirm.mjs        → x402 payment execution
-  openclaw-runtime-config.mjs     → Runtime path and env resolution
-  setup-sandbox.sh                → Sandbox dependency setup
-assets/
-  mcporter.json                   → MCP transport configuration
+SKILL.md                      → Minimal agent guidance (CLI/MCP-first)
+skill.json                    → Skill metadata + local MCP stdio declaration
 ```
 
 ## Environment variables
 
 | Variable | Purpose | Default |
 | :--- | :--- | :--- |
-| `MOLTBANK` | Active Bearer token for MCP calls | Set by `moltbank setup` |
-| `APP_BASE_URL` | MoltBank server URL | `https://app.moltbank.bot` |
-| `MOLTBANK_CREDENTIALS_PATH` | Local credentials storage path | `~/.MoltBank` |
-| `MOLTBANK_SKILL_NAME` | Skill folder name in workspace | `MoltBank` |
+| `MOLTBANK_CUSTOM_API_URL` | Optional non-production API URL override for explicit preview/dev testing | unset (production URL is used) |
+| `MOLTBANK_CREDENTIALS_PATH` | Local credentials file path | `~/.MoltBank/credentials.json` |
 
 ## Security
 
-Credentials and the x402 signer private key are stored locally. The agent communicates with the MoltBank MCP server at `app.moltbank.bot` for treasury operations. See `references/compliance.md` for the full endpoint inventory and operational boundaries.
+Credentials and signer material stay local on the machine. The agent should not mutate global OpenClaw config or sandbox settings as part of normal usage.
 
-Only install this skill if you trust MoltBank with your organization's treasury operation data.
+For CLI routing safety, production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
 ## Links
 
