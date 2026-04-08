@@ -69,7 +69,7 @@ When the user asks to buy or use an x402-protected endpoint:
 
 ## Budget Proposals On Base (Important)
 
-When creating a Base bot budget (`propose_openclaw_budget` / `moltbank budget propose`) and the backend says the x402 wallet is not registered:
+When creating a Base bot budget (`propose_bot_budget` / `moltbank budget propose`) and the backend says the x402 wallet is not registered:
 
 1. Run `moltbank x402 signer init --json` to obtain/reuse the bot wallet address.
 2. Run `moltbank x402 wallet register --wallet-address "<signerAddress>" --json`.
@@ -95,7 +95,7 @@ Then validate:
 
 ## Boundaries
 
-- Do not edit global OpenClaw configuration.
+- Do not edit global runtime configuration.
 - Do not mutate sandbox defaults.
 - Do not install software unless the user explicitly asks.
 - Keep secrets local; never print full tokens or private keys.
