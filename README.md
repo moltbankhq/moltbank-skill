@@ -28,8 +28,6 @@ moltbank auth begin --json
 moltbank doctor --json
 ```
 
-If you are on an older setup, `@moltbankhq/openclaw` is the legacy package name.
-
 Then use either:
 
 ```bash
