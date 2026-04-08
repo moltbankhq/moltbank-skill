@@ -62,9 +62,10 @@ When the user asks to buy or use an x402-protected endpoint:
 1. If the exact x402 URL is known, use `moltbank_x402_auto_pay`.
 2. If the URL is not known, use `moltbank_discover_x402_bazaar` first, then use `moltbank_x402_auto_pay`.
 3. Do not manually orchestrate signer init, wallet registration, inspect, treasury funding, payment execution, or receipt logging. `moltbank_x402_auto_pay` handles those steps.
-4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop.
+4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. If `bootstrapBudget.approvalUrl` is present, provide that exact link and tell the user to approve it, then rerun the same auto-pay request.
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
+7. If auto-pay returns gas top-up proposals, offer a future autonomy fix: register x402 wallet first, then propose/update transfer budget so LI.FI x402 gas routes are pre-authorized (`hasX402Preauthorization=true`).
 
 ## Installation (Only When Explicitly Requested)
 
