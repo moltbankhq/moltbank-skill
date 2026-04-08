@@ -4,7 +4,7 @@ description: Manage treasury balances, payment drafts, approvals, and x402 actio
 homepage: https://app.moltbank.bot
 metadata:
   category: finance
-  version: 2.0.0
+  version: 0.1.1
   openclaw:
     requires:
       bins: ["moltbank"]
