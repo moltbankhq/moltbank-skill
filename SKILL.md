@@ -98,7 +98,7 @@ CLI flags:
 
 If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
 
-`npm install -g @megalinker/mbcli`
+`npm install -g @moltbankhq/cli`
 
 Then validate:
 
