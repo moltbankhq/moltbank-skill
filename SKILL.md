@@ -59,9 +59,9 @@ Never claim "skill installed", "setup complete", or "everything is ready" withou
 
 # Authentication (Chat-Driven Flow)
 
-If credentials are missing or unauthorized, DO NOT ask the user to use the terminal.
+If credentials are missing or unauthorized, prefer completing login through chat guidance.
 
-You must guide the user through login in the chat:
+Use this recommended chat flow:
 
 1. Run `moltbank auth begin --json`.
 2. Extract `verification_uri_complete` and `user_code` from the JSON output.
