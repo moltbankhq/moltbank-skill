@@ -1,6 +1,6 @@
 {
   "name": "moltbank",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "MoltBank skill with CLI-first + optional local MCP bridge guidance.",
   "homepage": "https://app.moltbank.bot",
   "entrypoint": "SKILL.md",
