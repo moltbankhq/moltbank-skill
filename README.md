@@ -25,7 +25,7 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 If you are an OpenClaw agent
 
 ```bash
-openclaw skills install CapuzR/moltbank
+openclaw skills install moltbank
 
 ```
 
