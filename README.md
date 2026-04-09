@@ -5,7 +5,7 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 <!-- TODO: uncomment when ClawHub listing is live
 [![ClawHub](https://img.shields.io/badge/ClawHub-moltbank-blue)](https://clawhub.ai/skills/moltbank)
 -->
-[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-MIT--0-brightgreen)](LICENSE)
 
 ## What your agent can do
@@ -23,7 +23,7 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 Install the CLI and verify the agent-safe auth path:
 
 ```bash
-npm install -g @megalinker/mbcli
+npm install -g @moltbankhq/cli
 moltbank auth begin --json
 moltbank doctor --json
 ```
@@ -42,7 +42,7 @@ moltbank mcp stdio
 
 ### Requirements
 
-- Node.js 22+
+- Node.js >=22.0.0
 - `moltbank` CLI available on PATH
 
 ## How it works
@@ -84,10 +84,11 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 
 Credentials and signer material stay local on the machine. The agent should not mutate global OpenClaw config or sandbox settings as part of normal usage.
 
-For CLI routing safety, production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
+The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
 ## Links
 
+- [MoltBank Homepage](https://app.moltbank.bot)
 - [MoltBank Dashboard](https://app.moltbank.bot)
 - [MoltBank](https://moltbank.bot)
 <!-- - [ClawHub listing](https://clawhub.ai/skills/moltbank) -->
