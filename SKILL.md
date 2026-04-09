@@ -1,13 +1,19 @@
 ---
 name: moltbank
 description: Manage treasury balances, payment drafts, approvals, and x402 actions through the MoltBank CLI or local MCP bridge.
-homepage: https://app.moltbank.bot
+version: 0.1.2
 metadata:
   category: finance
-  version: 0.1.1
   openclaw:
+    homepage: https://app.moltbank.bot
     requires:
-      bins: ["moltbank"]
+      bins:
+        - moltbank
+    install:
+      - kind: node
+        package: "@moltbankhq/cli"
+        bins:
+          - moltbank
 ---
 
 # MoltBank Skill For AI Agents
@@ -96,7 +102,9 @@ CLI flags:
 
 ## Installation (Only When Explicitly Requested)
 
-If the user explicitly asks to install MoltBank CLI and `moltbank` is missing, run:
+This skill expects the `moltbank` CLI to be installed from the official npm package `@moltbankhq/cli`.
+
+Only if the user explicitly asks to install it and `moltbank` is missing, install:
 
 `npm install -g @moltbankhq/cli`
 
