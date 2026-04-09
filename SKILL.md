@@ -1,7 +1,7 @@
 ---
 name: moltbank
 description: Manage treasury balances, payment drafts, approvals, and x402 actions through the MoltBank CLI or local MCP bridge.
-version: 0.1.3
+version: 0.1.4
 metadata:
   category: finance
   openclaw:
@@ -38,15 +38,34 @@ When using `moltbank schema --json`, use command `name` for CLI execution. Do no
 
 When the user asks "what tools/functions can I use", run `moltbank tools list --json` and answer from that output.
 
+## Join / Bootstrap Sequence
+
+When the user asks to "join MoltBank" or to follow setup instructions:
+
+1. If the runtime has a skill manager, check skill readiness with that manager first.
+2. Treat the skill as installed only when the runtime reports it as ready/active.
+3. If the skill is missing or not ready, and the user explicitly approves setup, use the runtime-native installer:
+   - OpenClaw example: `openclaw skills install moltbank`, then confirm with `openclaw skills list` (`moltbank` must be `✓ ready`)
+   - skills.sh example: `npx skills add moltbankhq/moltbank-skill`
+4. Check CLI availability with `moltbank --version`.
+5. If CLI is missing and the user explicitly approves setup, install the CLI:
+   - `npm install -g @moltbankhq/cli`
+6. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
+7. Verify final state with `moltbank whoami --json`.
+8. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
+9. During basic join/setup, do not run x402 signer initialization or wallet registration unless the user explicitly requests x402 setup or a requested command requires it.
+
+Never claim "skill installed", "setup complete", or "everything is ready" without command evidence from the current session.
+
 # Authentication (Chat-Driven Flow)
 
-If credentials are missing or unauthorized, DO NOT ask the user to use the terminal.
+If credentials are missing or unauthorized, prefer completing login through chat guidance.
 
-You must guide the user through login in the chat:
+Use this recommended chat flow:
 
 1. Run `moltbank auth begin --json`.
 2. Extract `verification_uri_complete` and `user_code` from the JSON output.
-3. Present the clickable approval URL to the user in the chat.
+3. Present the approval URL to the user in the chat and tell them to verify the domain is `app.moltbank.bot` before opening it.
 4. Ask the user to click the link, approve the connection in their browser, and reply `done`.
 5. When the user replies `done`, run `moltbank auth poll --json`.
 6. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
@@ -95,29 +114,31 @@ CLI flags:
 - `--telegram-chat-id <id>` (required when channel is telegram)
 - `--slack-user-id <id>` (optional for Slack delivery outside Slack context)
 
-## Installation (Run on Startup if Missing)
+## Dependency Setup (Only With Explicit User Approval)
 
-Check if moltbank is installed by running `moltbank --version`.
-If missing, install in this order:
+MoltBank usage depends on:
+- a skill installation in the host runtime
+- the local `moltbank` CLI
 
-**Step 1 — Install the skill:**
+If setup is needed and the user explicitly approves installation:
+- do not invent ad-hoc install commands
+- treat skill installation as satisfied only when the runtime reports the skill as ready/active
+- if bootstrapping another runtime, install the skill first:
+  - OpenClaw: `openclaw skills install moltbank`
+  - skills.sh-compatible runtimes: `npx skills add moltbankhq/moltbank-skill`
+- then install the CLI:
+  - `npm install -g @moltbankhq/cli`
+- validate after installation:
+  - `moltbank auth begin --json`
+  - `moltbank doctor --json`
 
-If you are an OpenClaw agent, you MUST run this exact command first:
-`openclaw skills install moltbank`
-
-If you are any other agent:
-`npx skills add https://github.com/moltbankhq/moltbank-skill --global --yes`
-
-**Step 2 — Install the CLI:**
-`npm install -g @moltbankhq/cli`
-
-**Step 3 — Validate:**
-- `moltbank auth begin --json`
-- `moltbank doctor --json`
+Never auto-install dependencies without user approval.
 
 ## Boundaries
 
 - Do not edit global runtime configuration.
 - Do not mutate sandbox defaults.
-- Do not install software unless the user explicitly asks.
-- Keep secrets local; never print full tokens or private keys.
+- Do not install this skill or the `moltbank` CLI unless the user explicitly approves it.
+- Do not invent custom install commands when a platform-declared install flow exists.
+- Do not state that setup succeeded unless command output in this session confirms it.
+- Keep secrets local; never print full tokens, access tokens, or private keys.

@@ -20,27 +20,36 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 
 ## Quick start
 
-1.Install the skill for your agent:
+### OpenClaw
 
-If you are an OpenClaw agent
+Install the skill:
 
 ```bash
 openclaw skills install moltbank
-
 ```
 
-If you are any other agent
+If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-
-npx skills add https://github.com/moltbankhq/moltbank-skill --global --yes
-
+npm install -g @moltbankhq/cli@0.1.1
+npm audit signatures
+moltbank auth begin --json
+moltbank doctor --json
 ```
 
-2.Install the CLI and verify the agent-safe auth path:
+### Other agents using skills.sh
+
+Install the skill:
 
 ```bash
-npm install -g @moltbankhq/cli
+npx skills add moltbankhq/moltbank-skill
+```
+
+Install the CLI and verify:
+
+```bash
+npm install -g @moltbankhq/cli@0.1.1
+npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
 ```
@@ -55,11 +64,7 @@ or local MCP mode:
 
 ```bash
 moltbank mcp stdio
-
 ```
-
-
-
 
 ### Requirements
 
@@ -106,6 +111,10 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 Credentials and signer material stay local on the machine. The agent should not mutate global OpenClaw config or sandbox settings as part of normal usage.
 
 The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
+
+For manual CLI installation, prefer pinned versions (for example `@moltbankhq/cli@0.1.1`) and verify signatures with `npm audit signatures`.
+
+Before approving browser-based auth or approval flows, verify the domain is `app.moltbank.bot`.
 
 ## Links
 
