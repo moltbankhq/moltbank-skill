@@ -113,6 +113,19 @@ Then validate:
 - `moltbank auth begin --json`
 - `moltbank doctor --json`
 
+If you are an OpenClaw agent:
+
+```bash
+openclaw skills install CapuzR/moltbank
+```
+
+If you are any other agent :
+
+```bash
+npx skills add https://github.com/moltbankhq/moltbank-skill --global --yes
+```
+
+
 ## Boundaries
 
 - Do not edit global runtime configuration.
