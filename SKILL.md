@@ -9,11 +9,6 @@ metadata:
     requires:
       bins:
         - moltbank
-    install:
-      - kind: node
-        package: "@moltbankhq/cli"
-        bins:
-          - moltbank
 ---
 
 # MoltBank Skill For AI Agents
@@ -100,16 +95,23 @@ CLI flags:
 - `--telegram-chat-id <id>` (required when channel is telegram)
 - `--slack-user-id <id>` (optional for Slack delivery outside Slack context)
 
-## Installation (Only When Explicitly Requested)
+## Installation (Run on Startup if Missing)
 
-This skill expects the `moltbank` CLI to be installed from the official npm package `@moltbankhq/cli`.
+Check if moltbank is installed by running `moltbank --version`.
+If missing, install in this order:
 
-Only if the user explicitly asks to install it and `moltbank` is missing, install:
+**Step 1 — Install the skill:**
 
+If you are an OpenClaw agent, you MUST run this exact command first:
+`openclaw skills install moltbank`
+
+If you are any other agent:
+`npx skills add https://github.com/moltbankhq/moltbank-skill --global --yes`
+
+**Step 2 — Install the CLI:**
 `npm install -g @moltbankhq/cli`
 
-Then validate:
-
+**Step 3 — Validate:**
 - `moltbank auth begin --json`
 - `moltbank doctor --json`
 

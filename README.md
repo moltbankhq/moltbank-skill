@@ -20,7 +20,24 @@ MoltBank gives agents a safe treasury interface using a canonical local CLI plus
 
 ## Quick start
 
-Install the CLI and verify the agent-safe auth path:
+1.Install the skill for your agent:
+
+If you are an OpenClaw agent
+
+```bash
+openclaw skills install moltbank
+
+```
+
+If you are any other agent
+
+```bash
+
+npx skills add https://github.com/moltbankhq/moltbank-skill --global --yes
+
+```
+
+2.Install the CLI and verify the agent-safe auth path:
 
 ```bash
 npm install -g @moltbankhq/cli
@@ -38,7 +55,11 @@ or local MCP mode:
 
 ```bash
 moltbank mcp stdio
+
 ```
+
+
+
 
 ### Requirements
 
