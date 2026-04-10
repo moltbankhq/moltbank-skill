@@ -42,18 +42,21 @@ When the user asks "what tools/functions can I use", run `moltbank tools list --
 
 When the user asks to "join MoltBank" or to follow setup instructions:
 
-1. If the runtime has a skill manager, check skill readiness with that manager first.
-2. Treat the skill as installed only when the runtime reports it as ready/active.
-3. If the skill is missing or not ready, and the user explicitly approves setup, use the runtime-native installer:
+1. Check if the runtime skill is installed:
+   - OpenClaw: run `openclaw skills list`
+   - skills.sh: run `npx skills ls`
+2. If the runtime has a skill manager, check skill readiness with that manager first.
+3. Treat the skill as installed only when the runtime reports it as ready/active.
+4. If the skill is missing or not ready, and the user explicitly approves setup, use the runtime-native installer:
    - OpenClaw example: `openclaw skills install moltbank`, then confirm with `openclaw skills list` (`moltbank` must be `✓ ready`)
    - skills.sh example: `npx skills add moltbankhq/moltbank-skill`
-4. Check CLI availability with `moltbank --version`.
-5. If CLI is missing and the user explicitly approves setup, install the CLI:
+5. Check CLI availability with `moltbank --version`.
+6. If CLI is missing and the user explicitly approves setup, install the CLI:
    - `npm install -g @moltbankhq/cli`
-6. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
-7. Verify final state with `moltbank whoami --json`.
-8. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
-9. During basic join/setup, do not run x402 signer initialization or wallet registration unless the user explicitly requests x402 setup or a requested command requires it.
+7. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
+8. Verify final state with `moltbank whoami --json`.
+9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
+10. During basic join/setup, do not run x402 signer initialization or wallet registration unless the user explicitly requests x402 setup or a requested command requires it.
 
 Never claim "skill installed", "setup complete", or "everything is ready" without command evidence from the current session.
 
@@ -119,6 +122,12 @@ CLI flags:
 MoltBank usage depends on:
 - a skill installation in the host runtime
 - the local `moltbank` CLI
+
+MoltBank usage requires two separate dependencies:
+1. The skill installed in the host runtime (e.g., via `npx skills add` )
+2. The local `moltbank` CLI
+
+Do not skip the runtime skill installation just because the local CLI is already installed.
 
 If setup is needed and the user explicitly approves installation:
 - do not invent ad-hoc install commands
