@@ -42,11 +42,17 @@ When the user asks "what tools/functions can I use", run `moltbank tools list --
 
 When the user asks to "join MoltBank" or to follow setup instructions:
 
-1. If the runtime has a skill manager, check skill readiness with that manager first.
-2. Treat the skill as installed only when the runtime reports it as ready/active.
-3. If the skill is missing or not ready, and the user explicitly approves setup, use the runtime-native installer:
+Runtime isolation rule:
+- Do not use another runtime's skill manager (for example OpenClaw) to verify or install the skill for the current runtime. Each runtime is independent.
+
+1. Use only the current runtime's native skill mechanism:
+   - If current runtime is OpenClaw: run `openclaw skills list`
+   - If current runtime is skills.sh-compatible (for example Claude Code, Codex, Hermes, or Manus when `npx skills` is available): run `npx skills ls`
+   - If runtime capability is unclear, ask the user which runtime should be configured before running any skill-manager command.
+2. Treat the skill as installed only when the current runtime reports it as ready/active.
+3. If the skill is missing or not ready, and the user explicitly approves setup, use the current runtime's installer:
    - OpenClaw example: `openclaw skills install moltbank`, then confirm with `openclaw skills list` (`moltbank` must be `✓ ready`)
-   - skills.sh example: `npx skills add moltbankhq/moltbank-skill`
+   - skills.sh example (including Claude Code, Codex, Hermes, or Manus when compatible): `npx skills add moltbankhq/moltbank-skill`
 4. Check CLI availability with `moltbank --version`.
 5. If CLI is missing and the user explicitly approves setup, install the CLI:
    - `npm install -g @moltbankhq/cli`
@@ -120,8 +126,15 @@ MoltBank usage depends on:
 - a skill installation in the host runtime
 - the local `moltbank` CLI
 
+MoltBank usage requires two separate dependencies:
+1. The skill installed in the host runtime (e.g., via `npx skills add` )
+2. The local `moltbank` CLI
+
+Do not skip the runtime skill installation just because the local CLI is already installed.
+
 If setup is needed and the user explicitly approves installation:
 - do not invent ad-hoc install commands
+- do not use one runtime's manager to infer another runtime's skill installation status
 - treat skill installation as satisfied only when the runtime reports the skill as ready/active
 - if bootstrapping another runtime, install the skill first:
   - OpenClaw: `openclaw skills install moltbank`
