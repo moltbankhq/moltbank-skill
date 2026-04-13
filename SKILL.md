@@ -75,7 +75,7 @@ Runtime isolation rule:
    - skills.sh example (including Claude Code, Codex, Hermes, or Manus when compatible): `npx skills add moltbankhq/moltbank-skill`
 5. Check CLI availability with `moltbank --version`.
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
-   - `npm install -g @megalinker/mbcli`
+   - `npm install -g @moltbankhq/cli`
 7. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
@@ -156,7 +156,7 @@ If setup is needed and the user explicitly approves installation:
   - OpenClaw: `openclaw skills install moltbank`
   - skills.sh-compatible runtimes: `npx skills add moltbankhq/moltbank-skill`
 - then install the CLI:
-  - `npm install -g @megalinker/mbcli@<version>`
+  - `npm install -g @moltbankhq/cli@<version>`
 - validate after installation:
   - `moltbank auth begin --json`
   - `moltbank doctor --json`
