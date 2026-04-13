@@ -1,6 +1,6 @@
-# MoltBank
+# Moltbank
 
-MoltBank gives agents a safe treasury interface using a canonical local CLI plus an optional local MCP bridge.
+Moltbank gives agents a safe treasury interface using a canonical local CLI plus an optional local MCP bridge.
 
 <!-- TODO: uncomment when ClawHub listing is live
 [![ClawHub](https://img.shields.io/badge/ClawHub-moltbank-blue)](https://clawhub.ai/skills/moltbank)
@@ -76,7 +76,7 @@ moltbank mcp stdio
 This skill is intentionally thin:
 
 - The product surface is the local `moltbank` CLI.
-- Agents consume MoltBank through MCP tools first (`moltbank mcp stdio`) and CLI second.
+- Agents consume Moltbank through MCP tools first (`moltbank mcp stdio`) and CLI second.
 - If MCP is unavailable, agents should discover exact command/tool shape via `moltbank tools list --json`, `moltbank schema --json`, and `moltbank schema <command> --json` before execution.
 - Authentication is chat-driven via `moltbank auth begin --json` followed by `moltbank auth poll --json` after browser approval.
 - Local credentials and signer material stay local.
@@ -104,7 +104,7 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 | Variable | Purpose | Default |
 | :--- | :--- | :--- |
 | `MOLTBANK_CUSTOM_API_URL` | Optional non-production API URL override for explicit preview/dev testing | unset (production URL is used) |
-| `MOLTBANK_CREDENTIALS_PATH` | Local credentials file path | `~/.MoltBank/credentials.json` |
+| `MOLTBANK_CREDENTIALS_PATH` | Local credentials file path | `~/.moltbank/credentials.json` |
 
 ## Security
 
@@ -118,9 +118,9 @@ Before approving browser-based auth or approval flows, verify the domain is `app
 
 ## Links
 
-- [MoltBank Homepage](https://app.moltbank.bot)
-- [MoltBank Dashboard](https://app.moltbank.bot)
-- [MoltBank](https://moltbank.bot)
+- [Moltbank Homepage](https://app.moltbank.bot)
+- [Moltbank Dashboard](https://app.moltbank.bot)
+- [Moltbank](https://moltbank.bot)
 <!-- - [ClawHub listing](https://clawhub.ai/skills/moltbank) -->
 
 ## License
