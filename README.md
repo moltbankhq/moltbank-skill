@@ -31,7 +31,7 @@ openclaw skills install moltbank
 If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-npm install -g @moltbankhq/cli@0.1.1
+npm install -g @moltbankhq/cli
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
@@ -48,7 +48,7 @@ npx skills add moltbankhq/moltbank-skill
 Install the CLI and verify:
 
 ```bash
-npm install -g @moltbankhq/cli@0.1.1
+npm install -g @moltbankhq/cli
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
