@@ -74,7 +74,7 @@ This flow is privileged: it can result in installing software on the user's mach
 
 ### Approved update commands (source of truth)
 
-- Moltbank CLI: `npm install -g @megalinker/mbcli@0.1.1`
+- Moltbank CLI: `npm install -g {{CLI_PACKAGE}}@0.1.1`
 - OpenClaw skill check: `openclaw skills list`
 - OpenClaw skill update: `openclaw skills update --all`
 - skills.sh check: `npx skills check`
@@ -121,7 +121,7 @@ Runtime isolation rule:
 5. Check CLI availability with `moltbank --version`.
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
 
-   * `npm install -g @megalinker/mbcli`
+   * `npm install -g {{CLI_PACKAGE}}`
 7. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
@@ -221,7 +221,7 @@ If setup is needed and the user explicitly approves installation:
   * skills.sh-compatible runtimes: `npx skills add moltbankhq/moltbank-skill`
 * then install the CLI:
 
-  * `npm install -g @megalinker/mbcli@<version>`
+  * `npm install -g {{CLI_PACKAGE}}@<version>`
 * validate after installation:
 
   * `moltbank auth begin --json`

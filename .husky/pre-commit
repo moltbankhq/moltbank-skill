@@ -1,0 +1,3 @@
+node scripts/render-branch-docs.mjs
+git add README.md SKILL.md
+node scripts/check-branch-docs.mjs

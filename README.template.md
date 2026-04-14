@@ -29,7 +29,7 @@ openclaw skills install moltbank
 If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-npm install -g @megalinker/mbcli
+npm install -g {{CLI_PACKAGE}}
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
@@ -46,7 +46,7 @@ npx skills add moltbankhq/moltbank-skill
 Install the CLI and verify:
 
 ```bash
-npm install -g @megalinker/mbcli
+npm install -g {{CLI_PACKAGE}}
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
@@ -113,7 +113,7 @@ Credentials and signer material stay local on the machine. The agent should not 
 
 The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
-For manual CLI installation, prefer pinned versions (for example `@megalinker/mbcli@0.1.1`) and verify signatures with `npm audit signatures`.
+For manual CLI installation, prefer pinned versions (for example `{{CLI_PACKAGE}}@0.1.1`) and verify signatures with `npm audit signatures`.
 
 Before approving browser-based auth or approval flows, verify the domain is `app.moltbank.bot`.
 
