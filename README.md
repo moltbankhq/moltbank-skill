@@ -2,9 +2,7 @@
 
 Moltbank gives agents a safe treasury interface using a canonical local CLI plus an optional local MCP bridge.
 
-<!-- TODO: uncomment when ClawHub listing is live
 [![ClawHub](https://img.shields.io/badge/ClawHub-moltbank-blue)](https://clawhub.ai/skills/moltbank)
--->
 [![Node](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-MIT--0-brightgreen)](LICENSE)
 
