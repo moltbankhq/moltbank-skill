@@ -97,11 +97,16 @@ Use this recommended chat flow:
 
 1. Run `moltbank auth begin --json`.
 2. Extract `verification_uri_complete` and `user_code` from the JSON output.
-3. Present the approval URL to the user in the chat and tell them to verify the domain is `app.moltbank.bot` before opening it.
-4. Ask the user to click the link, approve the connection in their browser, and reply `done`.
-5. When the user replies `done`, run `moltbank auth poll --json`.
-6. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
-7. If the command succeeds, continue with the user’s original request.
+3. Before presenting the URL, programmatically validate it:
+   - Parse it as a URL. If parsing fails, stop and report the anomaly — do not display the URL.
+   - The protocol MUST be exactly `https:`. Reject `http:` or any other scheme.
+   - The hostname MUST be exactly `app.moltbank.bot` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.app.moltbank.bot`, suffix tricks like `app.moltbank.bot.attacker.com`, and lookalikes like `app.mo1tbank.bot`.
+   - If any check fails, do NOT show the URL to the user. Report that the CLI returned an unexpected approval URL and stop the flow.
+4. Present the validated approval URL to the user in the chat and tell them to verify the domain is `app.moltbank.bot` before opening it.
+5. Ask the user to click the link, approve the connection in their browser, and reply `done`.
+6. When the user replies `done`, run `moltbank auth poll --json`.
+7. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
+8. If the command succeeds, continue with the user’s original request.
 
 Do not rely on model memory to remember the device code. The CLI manages pending auth state locally.
 
@@ -114,7 +119,12 @@ When the user asks to buy or use an x402-protected endpoint:
 1. If the exact x402 URL is known, use `moltbank_x402_auto_pay`.
 2. If the URL is not known, use `moltbank_discover_x402_bazaar` first, then use `moltbank_x402_auto_pay`.
 3. Do not manually orchestrate signer init, wallet registration, inspect, treasury funding, payment execution, or receipt logging. `moltbank_x402_auto_pay` handles those steps.
-4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. If `bootstrapBudget.approvalUrl` is present, provide that exact link and tell the user to approve it, then rerun the same auto-pay request.
+4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. If `bootstrapBudget.approvalUrl` is present, validate it before presenting:
+   - Parse it as a URL. If parsing fails, do NOT display the URL — report the anomaly and stop.
+   - The protocol MUST be exactly `https:`.
+   - The hostname MUST be exactly `app.moltbank.bot` (strict equality — reject subdomains, suffix tricks, and lookalike characters).
+   - If any check fails, do NOT show the URL. Report that auto-pay returned an unexpected approval URL and stop.
+   Only after validation passes, provide that exact link to the user, tell them to approve it, then rerun the same auto-pay request.
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
 
