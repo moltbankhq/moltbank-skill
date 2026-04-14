@@ -1,7 +1,7 @@
 {
   "name": "moltbank",
-  "version": "0.1.6",
-  "description": "MoltBank skill with CLI-first + optional local MCP bridge guidance.",
+  "version": "0.1.7",
+  "description": "Moltbank skill with CLI-first + optional local MCP bridge guidance.",
   "homepage": "https://app.moltbank.bot",
   "entrypoint": "SKILL.md",
   "requirements": {
@@ -9,8 +9,8 @@
     "node": ">=22.0.0"
   },
   "mcpServers": {
-    "MoltBank": {
-      "description": "Local MoltBank stdio MCP bridge",
+    "Moltbank": {
+      "description": "Local Moltbank stdio MCP bridge",
       "transport": "stdio",
       "command": "moltbank",
       "args": ["mcp", "stdio"]
