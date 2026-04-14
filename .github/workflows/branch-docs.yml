@@ -1,0 +1,40 @@
+name: Branch docs check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - preview
+  push:
+    branches:
+      - main
+      - preview
+  merge_group:
+
+jobs:
+  check-branch-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set target branch for pull requests
+        if: github.event_name == 'pull_request'
+        run: echo "TARGET_BRANCH=${{ github.base_ref }}" >> $GITHUB_ENV
+
+      - name: Set target branch for direct pushes
+        if: github.event_name == 'push'
+        run: echo "TARGET_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Set target branch for merge queue runs
+        if: github.event_name == 'merge_group'
+        run: echo "TARGET_BRANCH=${{ github.event.merge_group.base_ref }}" >> $GITHUB_ENV
+
+      - name: Verify generated docs match templates
+        run: node scripts/check-branch-docs.mjs
