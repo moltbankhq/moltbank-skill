@@ -121,7 +121,7 @@ Runtime isolation rule:
 5. Check CLI availability with `moltbank --version`.
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
 
-   * `npm install -g @megalinker/mbcli`
+   * `npm install -g @megalinker/mbcli@0.1.1`
 7. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
@@ -141,7 +141,7 @@ Use this recommended chat flow:
 
    * Parse it as a URL. If parsing fails, stop and report the anomaly — do not display the URL.
    * The protocol MUST be exactly `https:`. Reject `http:` or any other scheme.
-   * The hostname MUST be exactly `app.moltbank.bot` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.app.moltbank.bot`, suffix tricks like `app.moltbank.bot.attacker.com`, and lookalikes like `app.mo1tbank.bot`.
+   * The hostname MUST be exactly `app.moltbank.bot` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.app.moltbank.bot`, suffix tricks like `app.moltbank.bot.attacker.com`, and lookalike characters.
    * If any check fails, do NOT show the URL to the user. Report that the CLI returned an unexpected approval URL and stop the flow.
 4. Present the validated approval URL to the user in the chat and tell them to verify the domain is `app.moltbank.bot` before opening it.
 5. Ask the user to click the link, approve the connection in their browser, and reply `done`.

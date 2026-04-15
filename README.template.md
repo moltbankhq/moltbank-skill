@@ -100,6 +100,21 @@ SKILL.md                      → Minimal agent guidance (CLI/MCP-first)
 skill.json                    → Skill metadata + local MCP stdio declaration
 ```
 
+## Local development (linking against an in-repo CLI)
+
+When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g {{CLI_PACKAGE}}@0.1.1` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
+
+```bash
+cp .env.example .env   # set LOCAL_OPENCLAW_PATH (and optionally LOCAL_HOMEPAGE_URL)
+pnpm docs:render:local
+```
+
+Outputs:
+
+- `SKILL.local.md` (gitignored) — locally-rendered skill. When the sibling `APP` repo sets `LOCAL_DEV_SKILL_FILE=../moltbank-skill/SKILL.local.md`, the Caddy dev proxy serves it at `https://localtest.app.moltbank.bot/skill.md`.
+
+`SKILL.md` and `README.md` remain tracked and always reflect the `main` / `preview` branch templates. Local render never touches them.
+
 ## Environment variables
 
 | Variable                    | Purpose                                                                   | Default                        |
