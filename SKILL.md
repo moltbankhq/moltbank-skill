@@ -221,7 +221,7 @@ If setup is needed and the user explicitly approves installation:
   * skills.sh-compatible runtimes: `npx skills add moltbankhq/moltbank-skill`
 * then install the CLI:
 
-  * `npm install -g @megalinker/mbcli@0.1.1`
+  * `npm install -g @megalinker/mbcli`
 * validate after installation:
 
   * `moltbank auth begin --json`
