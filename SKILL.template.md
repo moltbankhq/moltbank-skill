@@ -5,7 +5,7 @@ version: 0.1.7
 metadata:
   category: finance
   openclaw:
-    homepage: https://app.moltbank.bot
+    homepage: {{HOMEPAGE_URL}}
     requires:
       bins:
         - moltbank
@@ -74,7 +74,7 @@ This flow is privileged: it can result in installing software on the user's mach
 
 ### Approved update commands (source of truth)
 
-- Moltbank CLI: `npm install -g {{CLI_PACKAGE}}@0.1.1`
+- Moltbank CLI: `{{CLI_INSTALL_COMMAND}}`
 - OpenClaw skill check: `openclaw skills list`
 - OpenClaw skill update: `openclaw skills update --all`
 - skills.sh check: `npx skills check`
@@ -121,7 +121,7 @@ Runtime isolation rule:
 5. Check CLI availability with `moltbank --version`.
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
 
-   * `npm install -g {{CLI_PACKAGE}}`
+   * `{{CLI_INSTALL_COMMAND}}`
 7. Continue auth flow (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
@@ -141,9 +141,9 @@ Use this recommended chat flow:
 
    * Parse it as a URL. If parsing fails, stop and report the anomaly — do not display the URL.
    * The protocol MUST be exactly `https:`. Reject `http:` or any other scheme.
-   * The hostname MUST be exactly `app.moltbank.bot` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.app.moltbank.bot`, suffix tricks like `app.moltbank.bot.attacker.com`, and lookalikes like `app.mo1tbank.bot`.
+   * The hostname MUST be exactly `{{AUTH_HOSTNAME}}` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.{{AUTH_HOSTNAME}}`, suffix tricks like `{{AUTH_HOSTNAME}}.attacker.com`, and lookalike characters.
    * If any check fails, do NOT show the URL to the user. Report that the CLI returned an unexpected approval URL and stop the flow.
-4. Present the validated approval URL to the user in the chat and tell them to verify the domain is `app.moltbank.bot` before opening it.
+4. Present the validated approval URL to the user in the chat and tell them to verify the domain is `{{AUTH_HOSTNAME}}` before opening it.
 5. Ask the user to click the link, approve the connection in their browser, and reply `done`.
 6. When the user replies `done`, run `moltbank auth poll --json`.
 7. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
@@ -164,7 +164,7 @@ When the user asks to buy or use an x402-protected endpoint:
 
    * Parse it as a URL. If parsing fails, do NOT display the URL — report the anomaly and stop.
    * The protocol MUST be exactly `https:`.
-   * The hostname MUST be exactly `app.moltbank.bot` (strict equality — reject subdomains, suffix tricks, and lookalike characters).
+   * The hostname MUST be exactly `{{AUTH_HOSTNAME}}` (strict equality — reject subdomains, suffix tricks, and lookalike characters).
    * If any check fails, do NOT show the URL. Report that auto-pay returned an unexpected approval URL and stop.
      Only after validation passes, provide that exact link to the user, tell them to approve it, then rerun the same auto-pay request.
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
@@ -221,7 +221,7 @@ If setup is needed and the user explicitly approves installation:
   * skills.sh-compatible runtimes: `npx skills add moltbankhq/moltbank-skill`
 * then install the CLI:
 
-  * `npm install -g {{CLI_PACKAGE}}@<version>`
+  * `{{CLI_INSTALL_COMMAND}}`
 * validate after installation:
 
   * `moltbank auth begin --json`

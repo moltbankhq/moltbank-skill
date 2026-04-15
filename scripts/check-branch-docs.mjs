@@ -7,9 +7,15 @@ const ROOT = process.cwd();
 const BRANCH_CONFIG = {
   main: {
     CLI_PACKAGE: "@moltbankhq/cli",
+    CLI_INSTALL_COMMAND: "npm install -g @moltbankhq/cli@0.1.1",
+    HOMEPAGE_URL: "https://app.moltbank.bot",
+    AUTH_HOSTNAME: "app.moltbank.bot",
   },
   preview: {
     CLI_PACKAGE: "@megalinker/mbcli",
+    CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli@0.1.1",
+    HOMEPAGE_URL: "https://app.moltbank.bot",
+    AUTH_HOSTNAME: "app.moltbank.bot",
   },
 };
 
