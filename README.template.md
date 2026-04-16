@@ -102,7 +102,7 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 
 ## Local development (linking against an in-repo CLI)
 
-When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g {{CLI_PACKAGE}}@0.1.1` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
+When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g {{CLI_PACKAGE}}` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
 
 ```bash
 cp .env.example .env   # set LOCAL_OPENCLAW_PATH (and optionally LOCAL_HOMEPAGE_URL)
