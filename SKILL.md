@@ -1,7 +1,7 @@
 ---
 name: moltbank
 description: Manage treasury balances, payment drafts, approvals, and x402 actions through the Moltbank CLI or local MCP bridge.
-version: 0.1.8
+version: 0.1.9
 metadata:
   category: finance
   openclaw:
