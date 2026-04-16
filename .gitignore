@@ -1,0 +1,9 @@
+node_modules/
+
+# Local-only env (contains developer-specific absolute paths)
+.env
+.env.local
+!.env.example
+
+# Developer-specific local render output — do not commit.
+SKILL.local.md
