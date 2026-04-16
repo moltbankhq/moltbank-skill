@@ -102,7 +102,7 @@ skill.json                    → Skill metadata + local MCP stdio declaration
 
 ## Local development (linking against an in-repo CLI)
 
-When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g @megalinker/mbcli@0.1.1` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
+When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g @megalinker/mbcli` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
 
 ```bash
 cp .env.example .env   # set LOCAL_OPENCLAW_PATH (and optionally LOCAL_HOMEPAGE_URL)
@@ -128,7 +128,7 @@ Credentials and signer material stay local on the machine. The agent should not 
 
 The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
-For manual CLI installation, prefer pinned versions (for example `@megalinker/mbcli@0.1.1`) and verify signatures with `npm audit signatures`.
+For manual CLI installation, prefer pinned versions (for example `@megalinker/mbcli`) and verify signatures with `npm audit signatures`.
 
 Before approving browser-based auth or approval flows, verify the domain is `app.moltbank.bot`.
 
