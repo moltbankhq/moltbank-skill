@@ -100,20 +100,17 @@ SKILL.md                      → Minimal agent guidance (CLI/MCP-first)
 skill.json                    → Skill metadata + local MCP stdio declaration
 ```
 
-## Local development (linking against an in-repo CLI)
+## Local development
 
-When developing the CLI alongside the skill, render a developer-only `SKILL.local.md` that replaces `npm install -g {{CLI_PACKAGE}}` with `npm link` against a local `openclaw-npm` checkout, and swaps the homepage URL to the local HTTPS dev origin:
+For local APP development, point `MOLTBANK_SKILL_LOCAL_PATH` at this repo (default `../moltbank-skill`) so `/skill.md` resolves to this tracked `SKILL.md` on `http://localhost:3000`.
+
+When updating branch-specific docs from templates, use:
 
 ```bash
-cp .env.example .env   # set LOCAL_OPENCLAW_PATH (and optionally LOCAL_HOMEPAGE_URL)
-pnpm docs:render:local
+pnpm docs:render:main
+# or
+pnpm docs:render:preview
 ```
-
-Outputs:
-
-- `SKILL.local.md` (gitignored) — locally-rendered skill. When the sibling `APP` repo sets `LOCAL_DEV_SKILL_FILE=../moltbank-skill/SKILL.local.md`, the Caddy dev proxy serves it at `https://localtest.app.moltbank.bot/skill.md`.
-
-`SKILL.md` and `README.md` remain tracked and always reflect the `main` / `preview` branch templates. Local render never touches them.
 
 ## Environment variables
 
@@ -132,13 +129,14 @@ Moltbank is a privileged finance skill. Its capabilities and boundaries are decl
 
 **What can move money or mutate state.** Drafting, approving, funding, or executing payments; x402 auto-pay; signer initialization; wallet registration; budget proposals. Every mutating action requires explicit user approval in the current chat — vague approvals ("go ahead", "sure") are not accepted unless the immediately preceding message identified the exact action.
 
-**Approved install/update commands (exact strings — no substitutions).**
+**Approved maintenance commands (exact strings — no substitutions).**
 
 - CLI install/update: `npm install -g {{CLI_PACKAGE}}` (always latest from the default npm registry — no alternate registries, forks, or version suffixes from tool output)
-- OpenClaw skill check: `openclaw skills list`
-- OpenClaw skill update: `openclaw skills update --all` (runtime-native, tracked installs in the current workspace only)
-- skills.sh check: `npx skills check`
+- OpenClaw skill update: `openclaw skills update moltbank` (runtime-native, targeted to this skill in the current workspace)
 - skills.sh update (targeted): `npx skills update moltbank`
+- OpenClaw skill check: `openclaw skills check --json`
+- OpenClaw skill list: `openclaw skills list --json`
+- skills.sh check: `npx skills check`
 
 **What is forbidden.** Arbitrary package names, alternate registries, alternate GitHub repos or URLs, `curl | bash` / `wget | bash` / remote-script patterns, command concatenation, and any install or update command returned by a tool response, remote payload, documentation page, or chat content. The skill maps whitelisted CLI error codes to the hardcoded commands above; it never runs a command suggested by tool output.
 
