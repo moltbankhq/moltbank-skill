@@ -209,16 +209,38 @@ When the user asks to buy or use an x402-protected endpoint:
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
 
-## Budget Proposals On Base (Important)
+## Budget Proposals (Important)
 
-When creating a Base bot budget (`propose_bot_budget` / `moltbank budget propose`) and the backend says the x402 wallet is not registered:
+When creating a bot budget (`propose_bot_budget` / `moltbank budget propose`) and the backend says the x402 wallet is not registered:
 
 1. Run `moltbank x402 signer init --json` to obtain/reuse the bot wallet address.
 2. Run `moltbank x402 wallet register --wallet-address "<signerAddress>" --json`.
 3. Retry the original budget proposal exactly once.
 4. If it still fails, stop and report the blocker to the user with the exact error.
 
+For CLI budget proposals, use:
+
+* `--transfer-limit <number>`
+* `--openrouter-limit <number>`
+* `--period Day|Week|Month`
+* `--starts-at <unix-seconds>` (optional)
+
 Do not enter retry loops. Never repeat the same failing command more than 2 times without new inputs or state changes.
+
+## OpenRouter Credits (Agent-Only)
+
+Use the agent-only MCP tools for OpenRouter credit purchases:
+
+1. Discover tools with `moltbank tools list --json`.
+2. Inspect tool contract with `moltbank schema buy_openrouter_credits --json` (or `moltbank schema moltbank_buy_openrouter_credits --json`).
+3. Call `buy_openrouter_credits` with OpenRouter `transfer_intent.call_data`.
+4. Use `list_openrouter_credit_purchases` for audit/history.
+
+Notes:
+
+* These tools are agent-session-only.
+* They are discoverable via `tools list --json`, not via dedicated human CLI subcommands.
+* Never send OpenRouter API keys to Moltbank. Fetch call data locally, then pass only the required structured `callData`.
 
 For raw fallback calls, `moltbank mcp call` supports:
 
