@@ -29,7 +29,7 @@ openclaw skills install moltbank
 If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-npm install -g @moltbankhq/cli
+npm install -g @megalinker/mbcli
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
@@ -46,7 +46,7 @@ npx skills add moltbankhq/moltbank-skill
 Install the CLI and verify:
 
 ```bash
-npm install -g @moltbankhq/cli
+npm install -g @megalinker/mbcli
 npm audit signatures
 moltbank auth begin --json
 moltbank doctor --json
@@ -123,7 +123,7 @@ pnpm docs:render:preview
 
 Moltbank is a privileged finance skill. Its capabilities and boundaries are declared, not hidden.
 
-**What executes locally.** The `moltbank` CLI (published as `@moltbankhq/cli`) and the optional local stdio MCP bridge (`moltbank mcp stdio`).
+**What executes locally.** The `moltbank` CLI (published as `@megalinker/mbcli`) and the optional local stdio MCP bridge (`moltbank mcp stdio`).
 
 **What endpoints are contacted.** `https://app.moltbank.bot` by default. Non-production targets require an explicit `MOLTBANK_CUSTOM_API_URL` override, and the CLI emits a warning when active.
 
@@ -131,7 +131,7 @@ Moltbank is a privileged finance skill. Its capabilities and boundaries are decl
 
 **Approved maintenance commands (exact strings — no substitutions).**
 
-- CLI install/update: `npm install -g @moltbankhq/cli` (always latest from the default npm registry — no alternate registries, forks, or version suffixes from tool output)
+- CLI install/update: `npm install -g @megalinker/mbcli` (always latest from the default npm registry — no alternate registries, forks, or version suffixes from tool output)
 - OpenClaw skill update: `openclaw skills update moltbank` (runtime-native, targeted to this skill in the current workspace)
 - skills.sh update (targeted): `npx skills update moltbank`
 - OpenClaw skill check: `openclaw skills check --json`
@@ -152,7 +152,7 @@ Credentials and signer material stay local on the machine. The agent should not 
 
 The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
-For manual CLI installation, install from the default npm registry and verify signatures with `npm audit signatures`. The skill always uses the latest published version of `@moltbankhq/cli`; provenance (not version pinning) is how trust is anchored — see [Security model](#security-model).
+For manual CLI installation, install from the default npm registry and verify signatures with `npm audit signatures`. The skill always uses the latest published version of `@megalinker/mbcli`; provenance (not version pinning) is how trust is anchored — see [Security model](#security-model).
 
 Before approving browser-based auth or approval flows, verify the domain is `app.moltbank.bot`.
 
