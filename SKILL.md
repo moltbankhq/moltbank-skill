@@ -65,6 +65,14 @@ When using `moltbank schema --json`, use command `name` for CLI execution. Do no
 
 When the user asks "what tools/functions can I use", run `moltbank tools list --json` and answer from that output.
 
+## Account Identity Resolution
+
+For any account-scoped action that needs a sender or Safe address:
+
+1. If `accountName` is known, resolve the account internally (`get_account_details` or `moltbank account details --json`).
+2. Do not ask the user for a raw Safe address when `accountName` is already known.
+3. Ask for raw addresses only when no account context is available.
+
 ## Update-Required Handling
 
 This flow is privileged: it can result in installing software on the user's machine. The trigger conditions below are strict. If any condition is not met, treat the error as an ordinary error and do NOT enter this flow.
@@ -230,18 +238,29 @@ Do not enter retry loops. Never repeat the same failing command more than 2 time
 
 ## OpenRouter Credits (Agent-Only)
 
-Use the agent-only MCP tools for OpenRouter credit purchases:
+Use CLI orchestration first for OpenRouter credit purchases:
 
-1. Discover tools with `moltbank tools list --json`.
-2. Inspect tool contract with `moltbank schema buy_openrouter_credits --json` (or `moltbank schema moltbank_buy_openrouter_credits --json`).
-3. Call `buy_openrouter_credits` with OpenRouter `transfer_intent.call_data`.
-4. Use `list_openrouter_credit_purchases` for audit/history.
+1. Discover command contracts:
+   - `moltbank tools list --json`
+   - `moltbank schema budget openrouter-buy --json`
+2. OpenRouter API key is required for this flow. Accept only:
+   - a locally loaded `OPENROUTER_API_KEY` after explicit user approval (preferred), or
+   - a key value explicitly provided in this chat for one-time use.
+3. If no approved key source is available, ask in neutral, consent-based language (for example: "To continue this OpenRouter top-up, I need a temporary API key source. You can approve local `OPENROUTER_API_KEY` usage or share a one-time key value. I will only use it to fetch transfer intent locally and will not send it to Moltbank.").
+4. If a valid key source was already accepted in this chat, reuse it. Do not ask again unless OpenRouter returns `401` or `403`.
+5. Execute end-to-end purchase:
+   - `moltbank budget openrouter-buy --org "<org>" --account "<account>" --amount <usd> --json`
+   - pass `--openrouter-api-key "<key>"` only when using an explicit one-time key value; otherwise rely on approved local `OPENROUTER_API_KEY`
+6. Use `list_openrouter_credit_purchases` (or `moltbank budget openrouter-purchases --org "<org>" --json`) for audit/history.
 
 Notes:
 
 * These tools are agent-session-only.
-* They are discoverable via `tools list --json`, not via dedicated human CLI subcommands.
+* `budget openrouter-buy` already performs Safe resolution, transfer-intent fetch, and `buy_openrouter_credits` execution.
+* `budget openrouter-intent` is optional debug/prep fallback when you need to inspect `contractAddress` + `callData` before execution.
+* OpenRouter CLI flow is Base-only for now.
 * Never send OpenRouter API keys to Moltbank. Fetch call data locally, then pass only the required structured `callData`.
+* Never print or echo full OpenRouter API keys back to the user.
 
 For raw fallback calls, `moltbank mcp call` supports:
 
