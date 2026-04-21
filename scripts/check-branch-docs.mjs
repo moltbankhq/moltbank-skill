@@ -10,12 +10,16 @@ const BRANCH_CONFIG = {
     CLI_INSTALL_COMMAND: "npm install -g @moltbankhq/cli",
     HOMEPAGE_URL: "https://app.moltbank.bot",
     AUTH_HOSTNAME: "app.moltbank.bot",
+    MODS_URL: "https://moltbank.bot/mods",
+    MOD_REGISTRY_URL: "https://app.moltbank.bot/api/mods",
   },
   preview: {
     CLI_PACKAGE: "@megalinker/mbcli",
     CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
     HOMEPAGE_URL: "https://app.moltbank.bot",
     AUTH_HOSTNAME: "app.moltbank.bot",
+    MODS_URL: "https://preview.moltbank.bot/mods",
+    MOD_REGISTRY_URL: "https://preview-app.moltbank.bot/api/mods",
   },
 };
 
