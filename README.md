@@ -15,6 +15,28 @@ Moltbank gives agents a safe treasury interface using a canonical local CLI plus
 - Track transaction history, cash flow, and spending patterns
 - Call backend MCP tools from CLI with typed JSON output
 - Use a local stdio MCP bridge for structured agent tool calls
+- Install and run **Moltbank Mods** — structured products (skill + CLI + protocol) that extend your agent with specific capabilities (outreach, content, dashboards), all paid for through your Moltbank bot budget
+
+## Moltbank Mods
+
+Moltbank Mods are structured products that extend your agent with specific capabilities while using Moltbank for all financial operations (x402 payments, budget enforcement, receipts).
+
+Browse available Mods at [https://moltbank.bot/mods](https://moltbank.bot/mods).
+
+Install a Mod (for example, Moltbank Outreach):
+
+```bash
+moltbank mod install outreach
+```
+
+List what is installed, or manage Mods:
+
+```bash
+moltbank mod list
+moltbank mod info outreach
+moltbank mod doctor outreach
+moltbank mod run outreach
+```
 
 ## Quick start
 
