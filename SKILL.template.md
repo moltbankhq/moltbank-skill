@@ -230,37 +230,10 @@ When creating a bot budget (`propose_bot_budget` / `moltbank budget propose`) an
 For CLI budget proposals, use:
 
 * `--transfer-limit <number>`
-* `--openrouter-limit <number>`
 * `--period Day|Week|Month`
 * `--starts-at <unix-seconds>` (optional)
 
 Do not enter retry loops. Never repeat the same failing command more than 2 times without new inputs or state changes.
-
-## OpenRouter Credits (Agent-Only)
-
-Use CLI orchestration first for OpenRouter credit purchases:
-
-1. Discover command contracts:
-   - `moltbank tools list --json`
-   - `moltbank schema budget openrouter-buy --json`
-2. OpenRouter API key is required for this flow. Accept only:
-   - a locally loaded `OPENROUTER_API_KEY` after explicit user approval (preferred), or
-   - a key value explicitly provided in this chat for one-time use.
-3. If no approved key source is available, ask in neutral, consent-based language (for example: "To continue this OpenRouter top-up, I need a temporary API key source. You can approve local `OPENROUTER_API_KEY` usage or share a one-time key value. I will only use it to fetch transfer intent locally and will not send it to Moltbank.").
-4. If a valid key source was already accepted in this chat, reuse it. Do not ask again unless OpenRouter returns `401` or `403`.
-5. Execute end-to-end purchase:
-   - `moltbank budget openrouter-buy --org "<org>" --account "<account>" --amount <usd> --json`
-   - pass `--openrouter-api-key "<key>"` only when using an explicit one-time key value; otherwise rely on approved local `OPENROUTER_API_KEY`
-6. Use `list_openrouter_credit_purchases` (or `moltbank budget openrouter-purchases --org "<org>" --json`) for audit/history.
-
-Notes:
-
-* These tools are agent-session-only.
-* `budget openrouter-buy` already performs Safe resolution, transfer-intent fetch, and `buy_openrouter_credits` execution.
-* `budget openrouter-intent` is optional debug/prep fallback when you need to inspect `contractAddress` + `callData` before execution.
-* OpenRouter CLI flow is Base-only for now.
-* Never send OpenRouter API keys to Moltbank. Fetch call data locally, then pass only the required structured `callData`.
-* Never print or echo full OpenRouter API keys back to the user.
 
 For raw fallback calls, `moltbank mcp call` supports:
 
