@@ -1,7 +1,7 @@
 {
   "name": "moltbank-skill",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.1.10",
   "scripts": {
     "prepare": "husky",
     "docs:render": "node scripts/render-branch-docs.mjs",
