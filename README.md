@@ -31,7 +31,7 @@ If the local `moltbank` CLI is missing, install and verify:
 ```bash
 npm install -g @megalinker/mbcli
 npm audit signatures
-export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank/agents/default/credentials.json"
+export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank-test/agents/default/credentials.json"
 moltbank auth begin --json
 # user approves in browser, then:
 moltbank auth poll --json
@@ -51,7 +51,7 @@ Install the CLI and verify:
 ```bash
 npm install -g @megalinker/mbcli
 npm audit signatures
-export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank/agents/default/credentials.json"
+export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank-test/agents/default/credentials.json"
 moltbank auth begin --json
 # user approves in browser, then:
 moltbank auth poll --json
@@ -122,7 +122,7 @@ pnpm docs:render:preview
 
 | Variable                    | Purpose                                                                   | Default                        |
 | :-------------------------- | :------------------------------------------------------------------------ | :----------------------------- |
-| `MOLTBANK_CUSTOM_API_URL`   | Optional non-production API URL override for explicit preview/dev testing | unset (production URL is used) |
+| `MOLTBANK_CUSTOM_API_URL`   | Optional non-production API URL override for explicit preview/dev testing. When set, the CLI stores agent profiles under `~/.moltbank-test/agents/...` instead of `~/.moltbank/agents/...`, and `agent list` only sees the matching environment's profiles. | unset (production URL is used) |
 | `MOLTBANK_CREDENTIALS_PATH` | Credentials file path used by the current terminal session (required for most commands) | required (no implicit default) |
 | `MOLTBANK_RUNTIME`          | Optional runtime hint sent to MCP for trusted runtime/skill update checks | unset |
 | `MOLTBANK_SKILL_VERSION`    | Optional runtime skill version sent to MCP for trusted compatibility checks | unset |
