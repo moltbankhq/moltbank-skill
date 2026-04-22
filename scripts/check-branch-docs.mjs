@@ -10,12 +10,27 @@ const BRANCH_CONFIG = {
     CLI_INSTALL_COMMAND: "npm install -g @moltbankhq/cli",
     HOMEPAGE_URL: "https://app.moltbank.bot",
     AUTH_HOSTNAME: "app.moltbank.bot",
+    HOME_DIR_NAME: ".moltbank",
+    DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank/agents/default/credentials.json",
+    AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank/agents/<name>/credentials.json",
   },
   preview: {
     CLI_PACKAGE: "@megalinker/mbcli",
     CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
     HOMEPAGE_URL: "https://app.moltbank.bot",
     AUTH_HOSTNAME: "app.moltbank.bot",
+    HOME_DIR_NAME: ".moltbank-test",
+    DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
+    AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
+  },
+  "preview-multiagent": {
+    CLI_PACKAGE: "@megalinker/mbcli",
+    CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
+    HOMEPAGE_URL: "https://app.moltbank.bot",
+    AUTH_HOSTNAME: "app.moltbank.bot",
+    HOME_DIR_NAME: ".moltbank-test",
+    DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
+    AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
   },
 };
 
