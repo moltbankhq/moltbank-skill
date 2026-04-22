@@ -17,6 +17,12 @@ const BRANCH_CONFIG = {
     HOMEPAGE_URL: "https://app.moltbank.bot",
     AUTH_HOSTNAME: "app.moltbank.bot",
   },
+  "preview-multiagent": {
+    CLI_PACKAGE: "@megalinker/mbcli",
+    CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
+    HOMEPAGE_URL: "https://app.moltbank.bot",
+    AUTH_HOSTNAME: "app.moltbank.bot",
+  },
 };
 
 const FILE_MAP = [
