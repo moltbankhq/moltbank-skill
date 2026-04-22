@@ -80,7 +80,7 @@ When starting a new conversation session where you need to interact with Moltban
 3. **Wait for the user's reply** before proceeding. Do not assume, infer, or auto-select a profile even if only one exists.
 4. **Setup (if needed):** If the user wants a new profile:
    a. Ask for a name (e.g. "my-agent").
-   b. Set `credentialsPath` = `~/.moltbank/agents/<name>/credentials.json`.
+   b. Set `credentialsPath` = `~/.moltbank-test/agents/<name>/credentials.json`.
    c. Run `export MOLTBANK_CREDENTIALS_PATH="<credentialsPath>"` in this session shell before any authenticated command.
    d. Run `moltbank auth begin --json`.
    e. Extract `verification_uri_complete` and `user_code`, validate the URL (see Authentication flow), and show it to the user.
