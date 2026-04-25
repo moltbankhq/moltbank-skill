@@ -1,6 +1,6 @@
 ---
 name: moltbank
-description: Manage treasury balances, payment drafts, approvals, and x402 actions through the Moltbank CLI with strict per-session credential isolation.
+description: Manage treasury balances, payment drafts, approvals, transaction exports, x402 actions, and Polymarket prediction market trading through the Moltbank CLI with strict per-session credential isolation. Use when setting up Moltbank, authenticating, checking balances or approvals, drafting payments, exporting treasury history, discovering x402 endpoints, running one-shot x402 auto-pay workflows, or when the user wants to trade on Polymarket, check prediction market prices, place or cancel orders, check wallet status, browse markets, or inspect order books and trades.
 version: 0.1.10
 metadata:
   category: finance
@@ -301,6 +301,131 @@ If setup is needed and the user explicitly approves installation:
   * `moltbank doctor --json`
 
 Never auto-install dependencies without user approval.
+
+## Polymarket Trading
+
+Polymarket commands interact with real prediction markets and real funds. Apply the same confirmation discipline as payment drafting.
+
+**Safety rule:** Never run `polymarket create-order`, `polymarket cancel-order`, or `polymarket signer-to-safe` without explicit user approval in the current chat. Read-only commands (`markets`, `market`, `order-book`, `midpoint`, `get-orders`, `get-trades`, `get-order`) may run freely.
+
+## Full trading flow (required conversation pattern)
+
+When the user wants to trade, bet, or take a position on Polymarket:
+
+**Step 1 — Discover markets**
+
+```bash
+moltbank polymarket markets --json
+moltbank polymarket markets --limit 10 --active true --json
+# Filtered:
+moltbank polymarket markets --slug <partial-slug> --json
+```
+
+Fields to show from each market result:
+- `question` — what the market is predicting
+- `endDateIso` — when the market resolves
+- `active` / `closed` / `acceptingOrders` — whether it can be traded
+- `liquidity` / `volume24hr` — market depth and recent activity
+- `lastTradePrice` / `bestBid` / `bestAsk` — current price snapshot
+
+**Step 2 — Get full market details**
+
+Once the user selects a market, fetch its full context:
+
+```bash
+moltbank polymarket market --condition-id <conditionId> --json
+moltbank polymarket market --slug <slug> --json
+```
+
+The `conditionId` in the response is what you must use for `--condition-id` in `create-order`.
+
+From the response, present this brief to the user before any trade decision:
+
+| Field | Meaning |
+|---|---|
+| `question` | The prediction question |
+| `conditionId` | Market ID (needed for the order) |
+| `outcomes` | Outcome labels, e.g. `["Yes","No"]` |
+| `clobTokenIds` | Token IDs — **first = YES, second = NO** |
+| `outcomePrices` | Current prices per outcome (0–1, equals implied probability) |
+| `endDateIso` | Market resolution date |
+| `acceptingOrders` | Must be `true` to place orders |
+| `negRisk` | If `true`, this is a neg-risk market (multi-outcome) |
+
+**Step 3 — Check price and liquidity**
+
+```bash
+# Midpoint = implied probability price (e.g. 0.62 = 62% chance YES)
+moltbank polymarket midpoint --token-id <tokenIdFromClobTokenIds> --json
+
+# Full order book depth
+moltbank polymarket order-book --token-id <tokenId> --json
+```
+
+`mid` from midpoint is the fair price between best bid and ask. Use it to set a limit price or to understand market consensus.
+
+**Step 4 — Confirm execution inputs with user**
+
+Ask the user to confirm before placing the order:
+
+- `side`: `buy` (open position) or `sell` (close position)
+- `amount`: USDC to spend
+- `orderType`: `FAK` (market, immediate) | `GTC` (limit, stays open) | `GTD` (limit, expires 1 hour) | `FOK` (fill all or cancel)
+- `price`: only required for `GTC`/`GTD` — a number between 0 and 1 (e.g. `0.55`)
+- `token-id`: from `clobTokenIds[0]` for YES, `clobTokenIds[1]` for NO
+
+Show the user a summary like:
+> "Placing a FAK BUY order for 2 USDC on YES (token `123...`) at market price on market 'Will X happen?'"
+
+**Step 5 — Execute after explicit approval**
+
+```bash
+moltbank polymarket create-order \
+  --org "<org>" --account "<account>" \
+  --order-type FAK|FOK|GTC|GTD \
+  --token-id <tokenId> \
+  --condition-id <conditionId> \
+  --amount <usdc> --side buy|sell \
+  [--price <0-1>] --json
+```
+
+`create-order` handles all setup automatically (wallet registration, contract approvals, gas funding, USDC.e bridging). If it returns `order_created`, report the result including `orderResult.response.orderID` when available.
+
+## Other commands
+
+```bash
+# Cancel an open order
+moltbank polymarket cancel-order --order-id <orderId> --json
+
+# Check open orders and trades
+moltbank polymarket get-orders --json
+moltbank polymarket get-orders --market <conditionId> --json
+moltbank polymarket get-trades --json
+moltbank polymarket get-order --order-id <orderId> --json
+
+# Withdraw USDC.e from signer wallet back to treasury (Polygon → Base via LI.FI)
+moltbank polymarket signer-to-safe \
+  --org "<org>" --account "<account>" \
+  --amount <usdc> --json
+```
+
+## Status handling for `create-order`
+
+`create-order` auto-resolves most intermediate states. If it returns a non-`order_created` status, explain it to the user and wait for their instruction:
+
+| Status | Meaning | Action |
+|---|---|---|
+| `missing_signer_wallet` | Bot has no Polymarket wallet | Handled automatically |
+| `missing_contract_approvals` | Polygon contract approvals missing | Handled automatically |
+| `missing_budget` / `budget_inactive` | No Base budget configured | Run `moltbank budget propose --org "<org>" --account "<account>" --transfer-limit <n> --period Week --json` — requires user approval |
+| `budget_missing_permissions` | Budget exists but lacks Polymarket LI.FI routes | Ask user to create a new budget from the Moltbank web app — the existing budget lacks the required LI.FI route permissions for Polymarket |
+| `insufficient_budget` | Budget remaining < required amount | Show remaining/limit/reset, ask user to increase budget or wait |
+| `insufficient_safe_balance` | Safe does not have enough USDC on Base | Ask user to fund their Base treasury |
+| `needs_wallet_funding` | Signer wallet needs USDC.e on Polygon | Handled automatically |
+| `budget_proposed` | Budget proposed, pending on-chain activation | Tell user to approve the budget proposal, then retry |
+| `order_created` | Order placed successfully | Report result and order ID |
+
+Never retry `create-order` in a loop. If a status requires user action, stop and explain.
 
 ## Boundaries
 
