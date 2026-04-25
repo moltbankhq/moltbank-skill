@@ -213,6 +213,7 @@ Use this recommended chat flow:
 6. When the user replies `done`, run `moltbank auth poll --json`.
 7. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
 8. If the command succeeds, continue with the user’s original request.
+9. If `auth poll` returns `NO_PENDING_AUTH`, the local pending session has already been consumed (a concurrent flow or earlier poll picked it up). Run `moltbank auth status --json` once and treat `ready: true` as success. Do not retry `auth poll` repeatedly.
 
 Do not rely on model memory to remember the device code. The CLI manages pending auth state locally.
 
