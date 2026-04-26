@@ -230,8 +230,9 @@ CLI surface:
 
 * `moltbank pumpfun buy --org <O> --account <A> --mint <token-mint> --amount <n> --denominated-in-sol true|false --slippage <pct> --pool <route> --json`
 * `moltbank pumpfun sell --org <O> --account <A> --mint <token-mint> --amount <n|"100%"> --denominated-in-sol true|false --slippage <pct> --pool <route> --json`
-* `moltbank pumpfun create --token-name <Name> --token-symbol <SYM> --token-uri <ipfs-or-https-metadata> --amount <SOL-dev-buy> --slippage <pct> --json` (Pump.fun token launch + first dev buy)
+* `moltbank pumpfun create --token-name <Name> --token-symbol <SYM> --image <local-path> [--token-description <txt> --token-twitter <url> --token-telegram <url> --token-website <url>] --amount <SOL-dev-buy> --slippage <pct> --json` — Pump.fun launch + first dev buy. The CLI reads the image from disk, asks Moltbank to pin both image and metadata JSON to IPFS, and forwards the resulting metadata URI to PumpPortal. Power users with already-pinned metadata can pass `--token-uri <https://...>` instead of `--image`.
 * `moltbank pumpfun claim --json` (claims all accumulated Pump.fun creator fees)
+* `moltbank pumpfun watch [--new-tokens] [--migrations] [--token-trades <mint>]... [--account-trades <pubkey>]... [--duration <secs> | --follow] --json` — read-only Pump.fun / Bonk live data. `--duration` (default 30s) collects events and emits a single JSON object; `--follow` streams NDJSON until SIGINT, one event per line. No credentials needed — the underlying socket is public.
 
 Pool selects the underlying route: `pump` (default for buy/sell), `bonk` (LetsBonk.fun), `raydium`, `pump-amm`, `launchlab`, `raydium-cpmm`, or `auto`.
 
@@ -239,9 +240,10 @@ Operating rules:
 
 1. The agent's auto-$50 default budget already includes the Pump.fun USDC→SOL LI.FI pre-auth, so a fresh agent can run `pumpfun buy` immediately as long as the registered Solana wallet has enough SOL for `priorityFee` plus a small buffer. If the bot needs more SOL, the user can call `moltbank fund_pumpfun_wallet_sol` (via `moltbank mcp call`) to top it up from Safe USDC through LI.FI.
 2. Do NOT manually orchestrate Solana signer init, wallet registration, transaction signing, RPC submission, or receipt logging — every `pumpfun` subcommand handles all of that and attaches the AP2 IntentStructured for audit-v2.
-3. Validate `--mint` and any `--token-uri` the user supplies before running the command (mint must be base58, URI must be `https://` or `ipfs://`). Pump.fun no longer hosts metadata for programmatic creates, so the user must supply an externally-hosted metadata URI for `create`.
+3. Validate `--mint` (base58) and any URL the user supplies (`--token-uri`, `--token-twitter`, `--token-telegram`, `--token-website` — all `http(s)`). For `--image`, accept only png / jpg / jpeg / webp / gif and reject anything over 4 MiB before invoking the command. The CLI rejects out-of-range inputs server-side too, but failing fast saves a round trip.
 4. When trades fail with `PUMPFUN_BUILD_FAILED`, `PUMPFUN_RPC_SEND_FAILED`, or `PUMPFUN_SIGNER_MISMATCH`, surface the structured error verbatim and stop. Do not retry blindly; ask the user how to proceed.
 5. If the user wants a different Solana RPC, pass `--solana-rpc-url <https://...>` or set `MOLTBANK_SOLANA_RPC_URL` once for the session. The default public RPC works for smoke tests but is rate-limited.
+6. For `pumpfun watch --follow`, the command runs until SIGINT — emit a brief explanation to the user before starting and run it as a background-friendly invocation rather than a chat-blocking one. For one-shot snapshots, prefer `--duration <seconds>` so the command exits cleanly with a single JSON payload.
 
 ## Budget Proposals (Important)
 
