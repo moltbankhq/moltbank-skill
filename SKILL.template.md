@@ -80,8 +80,8 @@ When starting a new conversation session where you need to interact with Moltban
 3. **Wait for the user's reply** before proceeding. Do not assume, infer, or auto-select a profile even if only one exists.
 4. **Setup (if needed):** If the user wants a new profile:
    a. Ask the user one question: *"What should this agent be called in the Moltbank UI?"* (1-64 chars; e.g. "Trading Bot", "Slack Notifier"). The CLI derives the local profile directory from this label.
-   b. Run `moltbank auth begin --label "<name from step a>" --json`. The output JSON contains `credentialsPath`, `verification_uri_complete`, and `user_code`.
-   c. Validate the URL (see Authentication flow) and show the URL and code to the user.
+   b. Run `moltbank auth begin --label "<name from step a>" --json`. The output JSON contains `credentialsPath`, `verification_uri_complete`, and `user_code`. The CLI rejects malformed or off-host URLs before returning, so a JSON success exit means the URL is safe to show.
+   c. Show the URL and code to the user; tell them to verify the domain is `{{AUTH_HOSTNAME}}` before opening it.
    d. Run `export MOLTBANK_CREDENTIALS_PATH="<credentialsPath from step b output>"` in the session shell.
    e. Ask the user to approve in the browser and reply `done`.
    f. Run `moltbank auth poll --json` to finalize the session.
@@ -201,18 +201,11 @@ If credentials are missing or unauthorized, prefer completing login through chat
 Use this recommended chat flow:
 
 1. Run `moltbank auth begin --json`.
-2. Extract `verification_uri_complete` and `user_code` from the JSON output.
-3. Before presenting the URL, programmatically validate it:
-
-   * Parse it as a URL. If parsing fails, stop and report the anomaly — do not display the URL.
-   * The protocol MUST be exactly `https:`. Reject `http:` or any other scheme.
-   * The hostname MUST be exactly `{{AUTH_HOSTNAME}}` (strict equality — not `endsWith`, not a substring match). Reject subdomains like `evil.{{AUTH_HOSTNAME}}`, suffix tricks like `{{AUTH_HOSTNAME}}.attacker.com`, and lookalike characters.
-   * If any check fails, do NOT show the URL to the user. Report that the CLI returned an unexpected approval URL and stop the flow.
-4. Present the validated approval URL to the user in the chat and tell them to verify the domain is `{{AUTH_HOSTNAME}}` before opening it.
-5. Ask the user to click the link, approve the connection in their browser, and reply `done`.
-6. When the user replies `done`, run `moltbank auth poll --json`.
-7. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
-8. If the command succeeds, continue with the user’s original request.
+2. Extract `verification_uri_complete` and `user_code` from the JSON output. The CLI rejects any malformed or off-host URL before returning, so a JSON success exit means the URL is safe to show. Tell the user to verify the domain is `{{AUTH_HOSTNAME}}` before opening it.
+3. Ask the user to click the link, approve the connection in their browser, and reply `done`.
+4. When the user replies `done`, run `moltbank auth poll --json`.
+5. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
+6. If the command succeeds, continue with the user's original request.
 
 The CLI manages pending auth state locally — re-read it via `moltbank auth pending --json` if you need to recover device-code details mid-session.
 
@@ -225,13 +218,7 @@ When the user asks to buy or use an x402-protected endpoint:
 1. If the exact x402 URL is known, use `moltbank x402 auto-pay --json`.
 2. If the URL is not known, use `moltbank x402 discover --json` first, then use `moltbank x402 auto-pay --json`.
 3. Do not manually orchestrate signer init, wallet registration, inspect, treasury funding, payment execution, or receipt logging. `moltbank x402 auto-pay` handles those steps.
-4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. If `bootstrapBudget.approvalUrl` is present, validate it before presenting:
-
-   * Parse it as a URL. If parsing fails, do NOT display the URL — report the anomaly and stop.
-   * The protocol MUST be exactly `https:`.
-   * The hostname MUST be exactly `{{AUTH_HOSTNAME}}` (strict equality — reject subdomains, suffix tricks, and lookalike characters).
-   * If any check fails, do NOT show the URL. Report that auto-pay returned an unexpected approval URL and stop.
-     Only after validation passes, provide that exact link to the user, tell them to approve it, then rerun the same auto-pay request.
+4. If auto-pay returns `status: needs_user_approval`, explain that clearly and stop. The CLI validates `bootstrapBudget.approvalUrl` against the Moltbank base URL before exposing it: if the field is present, it is safe to show; if `bootstrapBudget.approvalUrlRejection` is present instead, the backend returned a URL that failed origin validation — surface the structured rejection reason to the operator and tell the user to approve the proposal manually in the Moltbank UI rather than presenting any URL.
 5. If auto-pay returns `status: needs_configuration`, explain what setup is missing and stop.
 6. If auto-pay succeeds, report success and include the returned `paymentTxHash` when available.
 

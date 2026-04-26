@@ -17,8 +17,8 @@ const BRANCH_CONFIG = {
   preview: {
     CLI_PACKAGE: "@megalinker/mbcli",
     CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
-    HOMEPAGE_URL: "https://app.moltbank.bot",
-    AUTH_HOSTNAME: "app.moltbank.bot",
+    HOMEPAGE_URL: "https://preview.app.moltbank.bot",
+    AUTH_HOSTNAME: "preview.app.moltbank.bot",
     HOME_DIR_NAME: ".moltbank-test",
     DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
     AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
