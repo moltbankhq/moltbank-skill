@@ -113,8 +113,9 @@ Moltbank's audit log groups multi-step workflows by linking child intents to a p
 Operating rules:
 
 1. The CLI auto-attaches the AP2 IntentStructured for every write command. You don't construct mandates by hand.
-2. For multi-step plans (e.g. "buy 5 cheap x402 endpoints in a row" or "scan all three trading venues and pick the best one"), the orchestration layer issues a planning intent first, then runs each child action with the planning intent's id as `parentIntentId`. Surfacing partial progress to the user is fine; emitting a fake parent or rewriting the chain is not.
+2. For multi-step plans, the orchestration layer issues a planning intent first, then runs each child action with the planning intent's id as `parentIntentId`. Surfacing partial progress to the user is fine; emitting a fake parent or rewriting the chain is not.
 3. Per-step amount, policy verdict, and execution status are authoritative on each child row. Aggregate "total spent in this workflow" by summing the children's `totalAmount` from the audit list — never invent a parent-level total that wasn't observed.
+4. The `--parent-intent-id <uuid>` flag is recognized on every write command that builds an AP2 intent. Pass the same parent UUID on every child step of one workflow; discover the exact subcommand surface for opening/closing a workflow parent via `moltbank tools list --json` before invoking it.
 
 ## Account Identity Resolution
 
