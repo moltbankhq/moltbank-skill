@@ -117,6 +117,66 @@ Operating rules:
 3. Per-step amount, policy verdict, and execution status are authoritative on each child row. Aggregate "total spent in this workflow" by summing the children's `totalAmount` from the audit list — never invent a parent-level total that wasn't observed.
 4. The `--parent-intent-id <uuid>` flag is recognized on every write command that builds an AP2 intent. Pass the same parent UUID on every child step of one workflow; discover the exact subcommand surface for opening/closing a workflow parent via `moltbank tools list --json` before invoking it.
 
+## Moltbank Mods (Agent Capabilities)
+
+Moltbank Mods extend the host CLI with domain capabilities (lead generation, intel, prediction-market trading, LLM gateways, integrations). Mods declare what they need from the core in a manifest, talk to the world only through `moltbank x402 auto-pay` and capability IDs the host resolves, persist their own state under `~/.moltbank/mods/<id>/`, and expose a uniform lifecycle (`setup` → `doctor` → `estimate` → `run` → `status` → `feedback`). The trust differential between `official` (Moltbank-built, signed) and `community` (third-party) is enforced by the runtime, not just labelled — community mods cannot spend silently, sign, or extend the backend.
+
+### Installed mods on this machine
+
+{{INSTALLED_MODS_LIST}}
+
+If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod ls --json` to discover installed mods and treat its `data.mods[]` as the authoritative list. Each entry carries `name`, `displayName`, `tier`, `riskLevel`, `interfaces`, `commands`, and `tools`.
+
+### Trust tiers — what changes at runtime
+
+| Tier | Signature | Spend | Signer (`signer_evm` / `signer_solana`) | Backend extension |
+|---|---|---|---|---|
+| `official` | Required (Moltbank publisher key) | Up to bot-budget cap | Allowed when manifest declares it | Allowed (security-reviewed) |
+| `community` | Absent | **Denied silently; only after explicit per-mod cap grant + per-run estimate confirmation** | Denied in v1 | Forbidden |
+| `verified` | Reserved in schema, hidden in v1 UI | n/a in v1 | n/a in v1 | n/a in v1 |
+
+Tier announcement is mandatory before every mod invocation (see "Invocation flow" below).
+
+### Invocation flow (mandatory before every mod call)
+
+1. **Inspect** the mod: `moltbank mod info <name> --json`. Read `data.manifest.tier`, `data.manifest.riskLevel`, `data.manifest.permissions.requested`, and `data.interfaces`. If `mod info` fails with `MOD_REVOKED`, `MOD_DEV_ROOT_REQUIRED`, or `MOD_STATE_TAMPERED`, stop and surface the error — do not retry through other paths.
+2. **Announce the tier** to the user verbatim, naming the capabilities:
+   > "Running `<displayName>` (Moltbank Official|Community Mod) — riskLevel: `<level>` — capabilities: `<permissions list>`. This mod can `<plain-language summary of permissions>`."
+   Do not skip on subsequent invocations within the same session — community-tier and `riskLevel: spend|trade` mods need re-acknowledgement per run.
+3. **Cost preview**: for any mod with `riskLevel: spend` or `trade`, run `moltbank mod estimate <name> --json` (or `moltbank mod run <name> estimate --json` if the manifest exposes estimate as a subcommand). Present the typical figure and the `±band`. Require explicit dollar-amount acknowledgement from the user — a vague "go ahead" is not sufficient.
+4. **Schema discovery**: write-action mod commands (`mod install`, `mod remove`, `mod update`, `mod run`) require schema discovery before first use in a session. Run `moltbank schema --json` once and `moltbank schema mod-run --json` (or the corresponding `mod-<verb>` schema) before invoking the write action; the host responds with `DISCOVERY_REQUIRED` otherwise.
+5. **Dispatch** through the host runtime, never directly:
+   - `cli` interface: `moltbank mod run <name> <subcommand> [--mod-arg key=value ...]`. Forwarded `--mod-arg` flags reach the mod via the SDK's `args[]` context field.
+   - `mcp` interface: call the registered MCP tool via the runtime's MCP surface (the host writes `~/.moltbank/mods/<id>/skill.json` with the `mcpServers` block at install time).
+   - `skill-only`: nothing to dispatch. `moltbank mod run` returns `MOD_NOT_EXECUTABLE` for these on purpose.
+6. **Direct binary execution is outside Moltbank's protection model.** `moltbank-<mod>` invoked directly (without going through `moltbank mod run`) bypasses the host's audit, env policy, and tier gates. Always prefer the host route.
+
+### Permissions vocabulary
+
+A mod's `permissions.requested[]` lists the host capabilities it claims to need. Recognized tokens:
+
+- `spend_budget` — spend USDC against the bot budget (subject to per-mod cap for community).
+- `network` — outbound HTTP, restricted to `permissions.network.allowedDomains[]` (advisory in v1; logged on violation).
+- `write_files` — writes under `state.scope`.
+- `read_kb` / `slack_post` — uses the corresponding capability mod (e.g. `kb`, `slack`).
+- `signer_evm` / `signer_solana` — request a signature from the core (denied to community in v1).
+- `env_passthrough` — manifest-declared env vars are passed through; never legal: `MOLTBANK_CREDENTIALS_PATH`, `*_PRIVATE_KEY`, `*_SECRET`, `MOLTBANK_*_KEY`.
+
+If `mod info` shows a permission you don't recognize, fall back to a literal disclosure ("This mod requests `<token>`") rather than guessing.
+
+### Capability resolution
+
+A mod's `moltbank.requires[]` lists capability IDs (`cap.x402.pay`, `cap.llm.chat`, ...). The host resolves each:
+
+- Core-provided (`cap.budget.*`, `cap.x402.*`, `cap.identity.*`, `cap.signer.*`, `cap.audit.*`, `cap.treasury.read`) — always available if `moltbank.minCliVersion` is satisfied.
+- Mod-provided (everything else) — resolves to whichever installed mod declares the id in `provides[]`. If multiple mods provide the same id, the resolver fails with `MOD_AMBIGUOUS_CAPABILITY` until the user pins one via `moltbank mod prefer <cap-id>=<modName>`.
+
+`moltbank mod doctor <name>` reports unresolved or ambiguous capabilities as failed `capability:<cap-id>` health checks. Don't proceed with `mod run` while doctor reports red.
+
+### When a mod is locked
+
+The host's state-scope post-run audit locks any mod that records ≥3 cross-mod write violations within a 7-day window. Subsequent `mod run` calls fail with `MOD_STATE_TAMPERED`. Recovery: the user investigates, then runs `moltbank mod reset <name>` to clear the lock and the violations counter. Don't suggest reset blindly — if the mod is community-tier, surface the violations log first (`<mod-home>/logs/state-audit.ndjson`).
+
 ## Account Identity Resolution
 
 For any account-scoped action that needs a sender or Safe address:

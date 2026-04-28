@@ -48,6 +48,14 @@ const FILE_MAP = [
   ["SKILL.template.md", "SKILL.md"],
 ];
 
+// Tokens filled by the agent runtime / host CLI at agent-load time, NOT by
+// branch-config render. They survive `renderTemplate` unchanged. The agent
+// harness substitutes them via `moltbank mod ls --json --skill-format` or
+// equivalent before showing the SKILL.md to the model.
+const RUNTIME_TEMPLATE_TOKENS = new Set([
+  "INSTALLED_MODS_LIST",
+]);
+
 function getBranch() {
   if (process.env.TARGET_BRANCH) return process.env.TARGET_BRANCH;
 
@@ -69,7 +77,12 @@ function getBranch() {
 }
 
 function renderTemplate(template, vars) {
-  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, key) => {
+  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => {
+    if (RUNTIME_TEMPLATE_TOKENS.has(key)) {
+      // Runtime token — survives the render unchanged so the agent harness
+      // can fill it in at session load time.
+      return match;
+    }
     if (!(key in vars)) {
       throw new Error(`Missing template variable: ${key}`);
     }

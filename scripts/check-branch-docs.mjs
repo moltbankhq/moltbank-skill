@@ -39,6 +39,11 @@ const FILE_MAP = [
   ["SKILL.template.md", "SKILL.md"],
 ];
 
+// See render-branch-docs.mjs for the rationale. Must be kept in sync.
+const RUNTIME_TEMPLATE_TOKENS = new Set([
+  "INSTALLED_MODS_LIST",
+]);
+
 function getBranch() {
   if (process.env.TARGET_BRANCH) return process.env.TARGET_BRANCH;
 
@@ -61,7 +66,8 @@ function getBranch() {
 }
 
 function renderTemplate(template, vars) {
-  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, key) => {
+  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => {
+    if (RUNTIME_TEMPLATE_TOKENS.has(key)) return match;
     if (!(key in vars)) {
       throw new Error(`Missing template variable: ${key}`);
     }

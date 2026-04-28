@@ -1,7 +1,7 @@
 {
   "name": "moltbank",
-  "version": "0.1.11",
-  "description": "Moltbank skill with CLI-first + optional local MCP bridge guidance.",
+  "version": "0.2.0",
+  "description": "Moltbank skill with CLI-first + optional local MCP bridge guidance, plus Mods v1.1 dispatcher and tier-announcement rules.",
   "homepage": "https://app.moltbank.bot",
   "entrypoint": "SKILL.md",
   "requirements": {

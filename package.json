@@ -1,7 +1,7 @@
 {
   "name": "moltbank-skill",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.2.0",
   "scripts": {
     "docs:render": "node scripts/render-branch-docs.mjs",
     "docs:check": "node scripts/check-branch-docs.mjs",
