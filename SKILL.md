@@ -125,7 +125,7 @@ Moltbank Mods extend the host CLI with domain capabilities (lead generation, int
 
 {{INSTALLED_MODS_LIST}}
 
-If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod ls --json` to discover installed mods and treat its `data.mods[]` as the authoritative list. Each entry carries `name`, `displayName`, `tier`, `riskLevel`, `interfaces`, `commands`, and `tools`.
+If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod list --skill-format` to get the same markdown block the harness was supposed to substitute, or `moltbank mod list --json` for the structured list with `name`, `displayName`, `tier`, `riskLevel`, `interfaces`, `commands`, and `tools` fields. Treat that result as authoritative.
 
 ### Trust tiers — what changes at runtime
 
