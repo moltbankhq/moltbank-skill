@@ -9,6 +9,7 @@
     "docs:render:preview": "TARGET_BRANCH=preview node scripts/render-branch-docs.mjs",
     "docs:check:main": "TARGET_BRANCH=main node scripts/check-branch-docs.mjs",
     "docs:check:preview": "TARGET_BRANCH=preview node scripts/check-branch-docs.mjs",
-    "docs:render:local": "TARGET_BRANCH=local node scripts/render-branch-docs.mjs"
+    "docs:render:local": "TARGET_BRANCH=local node scripts/render-branch-docs.mjs",
+    "docs:validate-all": "node scripts/validate-all-branches.mjs"
   }
 }
