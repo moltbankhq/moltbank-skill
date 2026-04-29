@@ -303,7 +303,7 @@ Runtime isolation rule:
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
 
    * `npm install -g @megalinker/mbcli`
-7. Continue auth flow for the selected session profile (`moltbank auth begin --json` then `moltbank auth poll --json` after user approval).
+7. Continue auth flow for the selected session profile. Use `moltbank auth begin --name "<Display Name>" --json` (the same display name the user picked or selected in step 4) followed by `moltbank auth poll --json` after the user approves in their browser. **Do not use `moltbank agent setup` here** — that command is the heavyweight provisioning surface (auth + on-chain signer + backend wallet registration) and requires `--purpose` for AP2 audit. For chat-driven auth pairing, `auth begin --name` is the right command.
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
 10. During basic join/setup, do not register an x402 wallet on-chain unless the user explicitly requests x402 setup or a requested command requires it.
@@ -314,14 +314,24 @@ Never claim "skill installed", "setup complete", or "everything is ready" withou
 
 If credentials are missing or unauthorized, prefer completing login through chat guidance.
 
-Use this recommended chat flow:
+## Which command to use
 
-1. Run `moltbank auth begin --json`.
+Two surfaces look superficially similar. Pick deliberately:
+
+- **`moltbank auth begin --name "<Display Name>" --json`** — the chat-driven auth pairing flow. Prompts the user to approve a device-code link in their browser, then `moltbank auth poll --json` finalizes the session. **This is the default for almost every auth scenario in chat.** Does NOT require `--purpose`. Does NOT provision signers or register wallets.
+- **`moltbank agent setup --name "<Display Name>" --purpose "<reason>" --json`** — heavyweight agent provisioning. Runs the same auth flow AND additionally bootstraps the agent's on-chain x402 + Solana signers and registers the resulting wallet addresses with the Moltbank backend. Requires `--purpose` because it grants the agent ongoing signing capability that future MCP calls will use. Reach for it ONLY when the user has explicitly asked you to provision signing capability (e.g. "set up an agent that can pay invoices").
+
+If you're unsure: use `auth begin --name`. The user can always run `agent setup` later when they explicitly want signer/wallet provisioning.
+
+## Recommended chat flow
+
+1. Run `moltbank auth begin --name "<Display Name>" --json`. Pass the same display name the user picked at session start (Session Setup §"Setup (if needed)"). The output JSON contains `credentialsPath`, `verification_uri_complete`, and `user_code`.
 2. Extract `verification_uri_complete` and `user_code` from the JSON output. The CLI rejects any malformed or off-host URL before returning, so a JSON success exit means the URL is safe to show. Tell the user to verify the domain is `preview.app.moltbank.bot` before opening it.
-3. Ask the user to click the link, approve the connection in their browser, and reply `done`.
-4. When the user replies `done`, run `moltbank auth poll --json`.
-5. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
-6. If the command succeeds, continue with the user's original request.
+3. Set `MOLTBANK_CREDENTIALS_PATH` in the session shell to the `credentialsPath` returned in step 1, so subsequent commands hit the right per-agent profile.
+4. Ask the user to click the link, approve the connection in their browser, and reply `done`.
+5. When the user replies `done`, run `moltbank auth poll --json`.
+6. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
+7. If the command succeeds, continue with the user's original request.
 
 The CLI manages pending auth state locally — re-read it via `moltbank auth pending --json` if you need to recover device-code details mid-session.
 
