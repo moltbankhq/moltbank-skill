@@ -119,13 +119,15 @@ Operating rules:
 
 ## Moltbank Mods (Agent Capabilities)
 
-Moltbank Mods extend the host CLI with domain capabilities (lead generation, intel, prediction-market trading, LLM gateways, integrations). Mods declare what they need from the core in a manifest, talk to the world only through `moltbank x402 auto-pay` and capability IDs the host resolves, persist their own state under `~/.moltbank/mods/<id>/`, and expose a uniform lifecycle (`setup` → `doctor` → `estimate` → `run` → `status` → `feedback`). The trust differential between `official` (Moltbank-built, signed) and `community` (third-party) is enforced by the runtime, not just labelled — community mods cannot spend silently, sign, or extend the backend.
+Moltbank Mods extend the host CLI with domain capabilities (lead generation, intel, prediction-market trading, LLM gateways, integrations). Mods declare what they need from the core in a manifest, talk to the world only through `moltbank x402 auto-pay` and capability IDs the host resolves, persist their own state under `~/.moltbank/orgs/<orgUuid>/mods/<id>/` (org-scoped; the legacy flat path `~/.moltbank/mods/<id>/` exists only as a dev-mode fallback and auto-migrates on first invocation), and expose a uniform lifecycle (`setup` → `doctor` → `estimate` → `run` → `status` → `feedback`). The trust differential between `official` (Moltbank-built, signed) and `community` (third-party) is enforced by the runtime, not just labelled — community mods cannot spend silently, sign, or extend the backend.
 
 ### Installed mods on this machine
 
 {{INSTALLED_MODS_LIST}}
 
-If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod list --skill-format` to get the same markdown block the harness was supposed to substitute, or `moltbank mod list --json` for the structured list with `name`, `displayName`, `tier`, `riskLevel`, `interfaces`, `commands`, and `tools` fields. Treat that result as authoritative.
+The list above is grouped by category: **Worker mods** (the things the user runs directly to perform tasks), **Capability mods** (composed by other mods through `cap.*` IDs; rarely invoked directly), **Integration mods** (notification / transport / external API wrappers), and **Knowledge mods** (read-only sources for other mods). When the user asks open-ended questions like "what mods do I have" or "what can I do", lead with the **Worker mods** section as the primary answer; mention capability/integration/knowledge mods only if the user asks for the full list, asks about a specific capability they provide, or asks how the workers compose.
+
+If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod list --skill-format` to get the same grouped markdown block the harness was supposed to substitute, or `moltbank mod list --json` for the structured list with `name`, `displayName`, `tier`, `riskLevel`, `category`, `interfaces`, `commands`, and `tools` fields. Treat that result as authoritative.
 
 ### Trust tiers — what changes at runtime
 
@@ -136,6 +138,21 @@ If the placeholder above appears literally (the agent harness has not substitute
 | `verified` | Reserved in schema, hidden in v1 UI | n/a in v1 | n/a in v1 | n/a in v1 |
 
 Tier announcement is mandatory before every mod invocation (see "Invocation flow" below).
+
+### Mod install verification (mandatory before approving `mod install`)
+
+Installing a mod runs third-party code on the user's machine. The host enforces several trust gates automatically; your job is to make those gates **visible to the user** before they approve and to surface any failure verbatim instead of suppressing it.
+
+1. **Inspect the registry entry first**: `moltbank mod info <name> --from-registry --json`. Read `data.manifest.tier`, `data.manifest.publisher`, `data.manifest.signature.publisherKeyId`, `data.manifest.signature.expiresAt`, `data.manifest.permissions.requested`, and `data.manifest.interfaces[].package`. Tell the user the publisher name, the publisher key id, the package the install will pull from npm, and the requested permissions — verbatim.
+2. **Honor the tier gate**:
+   - **Official**: the host verifies the ed25519 manifest signature against the pinned publisher key set on install and refuses if the signature is missing, malformed, expired, or signed by an unknown key. Surface `signature.publisherKeyId` and `signature.expiresAt` to the user; if either looks off (unknown key id, expiry in the past, expiry many years out), stop and ask.
+   - **Community**: there is no manifest signature. The host requires the explicit `--acknowledge-community` flag on install — do **not** add this flag silently. Tell the user "this mod is third-party and unsigned; the trust differential is real" and require explicit approval before passing the flag.
+   - **Verified**: reserved in the schema; if you encounter one in v1, treat it as community for the acknowledgement gate (the runtime UI for verified is not active in v1).
+3. **Expect provenance failure to fail closed**. If the host reports `MOD_REVOKED`, `MOD_DEV_ROOT_REQUIRED`, `MOD_STATE_TAMPERED`, or any signature/key/expiry error during install or first run, **stop**. Surface the structured error to the user; do not retry through `--from-url`, do not bypass with environment variables, do not silently fall back to a different version. Provenance failures are signal, not noise.
+4. **Verify after install**: run `moltbank mod doctor <name> --json`. Treat any red check (unresolved capability, ambiguous capability, missing required mod, locked state, signature failure) as blocking. Don't proceed to `mod run` while doctor reports red — the doctor output names the exact remediation.
+5. **Direct binary execution bypasses every gate above**. Never invoke `moltbank-<modname>` (the published CLI shim) directly; always go through `moltbank mod run <name>`. The host route is what enforces tier checks, env policy, audit, and the state-scope post-run audit.
+
+The skill does not invoke external supply-chain scanners; the trust posture is built on the host's manifest signing, the registry's signed index, the per-mod revocation list, and explicit user acknowledgement of community-tier risk.
 
 ### Invocation flow (mandatory before every mod call)
 
@@ -153,16 +170,19 @@ Tier announcement is mandatory before every mod invocation (see "Invocation flow
 
 ### Permissions vocabulary
 
-A mod's `permissions.requested[]` lists the host capabilities it claims to need. Recognized tokens:
+A mod's `permissions.requested[]` lists the host capabilities it claims to need. The validator accepts only these tokens (anything else fails install):
 
 - `spend_budget` — spend USDC against the bot budget (subject to per-mod cap for community).
 - `network` — outbound HTTP, restricted to `permissions.network.allowedDomains[]` (advisory in v1; logged on violation).
 - `write_files` — writes under `state.scope`.
-- `read_kb` / `slack_post` — uses the corresponding capability mod (e.g. `kb`, `slack`).
-- `signer_evm` / `signer_solana` — request a signature from the core (denied to community in v1).
+- `read_kb` — reads through the installed `cap.kb.*` provider (typically `kb-mod`).
+- `notify_send` — sends notifications through the installed `cap.notify.send` provider (e.g. `telegram-mod`). Provider-agnostic — the mod does not know which backend delivers.
+- `signer_evm` / `signer_solana` — request a signature from the core. **Denied to community-tier mods** at install time.
 - `env_passthrough` — manifest-declared env vars are passed through; never legal: `MOLTBANK_CREDENTIALS_PATH`, `*_PRIVATE_KEY`, `*_SECRET`, `MOLTBANK_*_KEY`.
+- `shell_exec` — spawn a host CLI subprocess that runs an external binary (`gh`, `git`, etc.). Used by integration mods that wrap a CLI tool.
+- `moltbank_mcp` — invoke Moltbank backend MCP tools via `moltbank mcp call`. Used by orchestrator mods that compose protocol-level cap calls with Moltbank-specific audit / status / budget tools. **Denied to community-tier mods** — the MCP surface includes spend-side tools whose trust gate is the official-tier review.
 
-If `mod info` shows a permission you don't recognize, fall back to a literal disclosure ("This mod requests `<token>`") rather than guessing.
+If `mod info` shows a permission outside this list, the manifest is invalid — surface the error rather than silently passing.
 
 ### Capability resolution
 
@@ -172,6 +192,18 @@ A mod's `moltbank.requires[]` lists capability IDs (`cap.x402.pay`, `cap.llm.cha
 - Mod-provided (everything else) — resolves to whichever installed mod declares the id in `provides[]`. If multiple mods provide the same id, the resolver fails with `MOD_AMBIGUOUS_CAPABILITY` until the user pins one via `moltbank mod prefer <cap-id>=<modName>`.
 
 `moltbank mod doctor <name>` reports unresolved or ambiguous capabilities as failed `capability:<cap-id>` health checks. Don't proceed with `mod run` while doctor reports red.
+
+### User-facing capability commands
+
+The capability resolver also has a direct user-facing surface — useful when the user wants to know which provider satisfies a capability or invoke one directly:
+
+- `moltbank cap resolve <cap-id> --json` — report which installed mod (or core path) provides the capability, and how the resolver decided. Use this when the user asks "who's providing my LLM" or "what's my notification backend".
+- `moltbank cap call <cap-id> <verb> [--arg key=value ...] --json` — invoke a capability directly through the resolver, bypassing a specific mod name. The same trust gates apply (tier, signature, permissions).
+- `moltbank mod prefer <cap-id>=<modName> --json` — pin a preference when two mods provide the same id. Required when `cap resolve` returns `MOD_AMBIGUOUS_CAPABILITY`.
+
+### Multi-org KB management
+
+When the user works across multiple Moltbank orgs and uses `kb-mod`, each org gets its own KB tree under `~/.moltbank/orgs/<orgUuid>/kb/`. To clone an existing org's KB into a new org's tree (e.g. when onboarding a second org), use `moltbank kb fork --from <sourceOrg> [--to <targetOrg>] [--force] --json`. The command clones the source's KB (git clone for git repos, plain copy otherwise) into the target's org-scoped path and writes the target's `kb-mod` config in one step. `kb-mod` config also accepts a `kbRootsExtra: string[]` field for additional read-only roots (searched after the primary root, deduplicated by relative path); writes via `cap.kb.propose` always go to the primary root only.
 
 ### When a mod is locked
 
