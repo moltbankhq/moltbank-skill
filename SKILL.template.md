@@ -127,13 +127,6 @@ Before any Polymarket order-creation command (for example `moltbank polymarket c
 
 Do not place Polymarket orders directly from an inferred market or inferred order type.
 
-If Polymarket reports missing/insufficient budget (or missing budget permissions), do not auto-create a proposal with guessed defaults. First ask the user for:
-
-1. transfer-limit amount (USDC),
-2. period frequency (`Day`, `Week`, or `Month`).
-
-Only after explicit confirmation, create the budget proposal.
-
 ## Account Identity Resolution
 
 For any account-scoped action that needs a sender or Safe address:
