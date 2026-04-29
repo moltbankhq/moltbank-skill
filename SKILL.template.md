@@ -117,6 +117,23 @@ Operating rules:
 3. Per-step amount, policy verdict, and execution status are authoritative on each child row. Aggregate "total spent in this workflow" by summing the children's `totalAmount` from the audit list — never invent a parent-level total that wasn't observed.
 4. The `--parent-intent-id <uuid>` flag is recognized on every write command that builds an AP2 intent. Pass the same parent UUID on every child step of one workflow; discover the exact subcommand surface for opening/closing a workflow parent via `moltbank tools list --json` before invoking it.
 
+## Polymarket Pre-Order Rule (Mandatory)
+
+Before any Polymarket order-creation command (for example `moltbank polymarket create-order ...`), the agent must always pause and confirm with the user:
+
+1. Show the exact target market/candidate to be traded (question/title + side context).
+2. Ask the user to choose/confirm the order type explicitly (`FAK`, `FOK`, `GTC`, or `GTD`).
+3. Only after user confirmation, execute create-order.
+
+Do not place Polymarket orders directly from an inferred market or inferred order type.
+
+If Polymarket reports missing/insufficient budget (or missing budget permissions), do not auto-create a proposal with guessed defaults. First ask the user for:
+
+1. transfer-limit amount (USDC),
+2. period frequency (`Day`, `Week`, or `Month`).
+
+Only after explicit confirmation, create the budget proposal.
+
 ## Account Identity Resolution
 
 For any account-scoped action that needs a sender or Safe address:
