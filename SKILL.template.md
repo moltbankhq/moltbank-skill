@@ -121,13 +121,13 @@ Operating rules:
 
 Moltbank Mods extend the host CLI with domain capabilities (lead generation, intel, prediction-market trading, LLM gateways, integrations). Mods declare what they need from the core in a manifest, talk to the world only through `moltbank x402 auto-pay` and capability IDs the host resolves, persist their own state under `~/.moltbank/orgs/<orgUuid>/mods/<id>/` (org-scoped; the legacy flat path `~/.moltbank/mods/<id>/` exists only as a dev-mode fallback and auto-migrates on first invocation), and expose a uniform lifecycle (`setup` → `doctor` → `estimate` → `run` → `status` → `feedback`). The trust differential between `official` (Moltbank-built, signed) and `community` (third-party) is enforced by the runtime, not just labelled — community mods cannot spend silently, sign, or extend the backend.
 
-### Installed mods on this machine
+### Installed mods and capabilities on this machine
 
 {{INSTALLED_MODS_LIST}}
 
-The list above is grouped by category: **Worker mods** (the things the user runs directly to perform tasks), **Capability mods** (composed by other mods through `cap.*` IDs; rarely invoked directly), **Integration mods** (notification / transport / external API wrappers), and **Knowledge mods** (read-only sources for other mods). When the user asks open-ended questions like "what mods do I have" or "what can I do", lead with the **Worker mods** section as the primary answer; mention capability/integration/knowledge mods only if the user asks for the full list, asks about a specific capability they provide, or asks how the workers compose.
+The list above uses only two user-facing groups: **Mods** are direct actions the user can ask the agent to run, and **Capabilities** are provider, integration, or knowledge building blocks that Mods compose through `cap.*` IDs. When the user asks open-ended questions like "what mods do I have" or "what can I do", lead with the **Mods** section as the primary answer; mention **Capabilities** only if the user asks for the full inventory, asks about a specific capability they provide, or asks how Mods compose.
 
-If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod list --skill-format` to get the same grouped markdown block the harness was supposed to substitute, or `moltbank mod list --json` for the structured list with `name`, `displayName`, `tier`, `riskLevel`, `category`, `interfaces`, `commands`, and `tools` fields. Treat that result as authoritative.
+If the placeholder above appears literally (the agent harness has not substituted it), run `moltbank mod list --skill-format` to get the same grouped markdown block the harness was supposed to substitute, or `moltbank mod list --json` for the structured list with `name`, `displayName`, `surface`, `tier`, `riskLevel`, `category`, `interfaces`, `commands`, and `tools` fields. Treat `surface` as the user-facing label (`mod` or `capability`); `category` is internal taxonomy.
 
 ### Trust tiers — what changes at runtime
 
@@ -157,8 +157,8 @@ The skill does not invoke external supply-chain scanners; the trust posture is b
 ### Invocation flow (mandatory before every mod call)
 
 1. **Inspect** the mod: `moltbank mod info <name> --json`. Read `data.manifest.tier`, `data.manifest.riskLevel`, `data.manifest.permissions.requested`, and `data.interfaces`. If `mod info` fails with `MOD_REVOKED`, `MOD_DEV_ROOT_REQUIRED`, or `MOD_STATE_TAMPERED`, stop and surface the error — do not retry through other paths.
-2. **Announce the tier** to the user verbatim, naming the capabilities:
-   > "Running `<displayName>` (Moltbank Official|Community Mod) — riskLevel: `<level>` — capabilities: `<permissions list>`. This mod can `<plain-language summary of permissions>`."
+2. **Announce the tier** to the user verbatim, naming the permissions:
+   > "Running `<displayName>` (Moltbank Official|Community Mod) — riskLevel: `<level>` — permissions: `<permissions list>`. This mod can `<plain-language summary of permissions>`."
    Do not skip on subsequent invocations within the same session — community-tier and `riskLevel: spend|trade` mods need re-acknowledgement per run.
 3. **Cost preview**: for any mod with `riskLevel: spend` or `trade`, run `moltbank mod estimate <name> --json` (or `moltbank mod run <name> estimate --json` if the manifest exposes estimate as a subcommand). Present the typical figure and the `±band`. Require explicit dollar-amount acknowledgement from the user — a vague "go ahead" is not sufficient.
 4. **Schema discovery**: write-action mod commands (`mod install`, `mod remove`, `mod update`, `mod run`) require schema discovery before first use in a session. Run `moltbank schema --json` once and `moltbank schema mod-run --json` (or the corresponding `mod-<verb>` schema) before invoking the write action; the host responds with `DISCOVERY_REQUIRED` otherwise.
