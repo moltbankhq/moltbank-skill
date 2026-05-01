@@ -29,7 +29,7 @@ openclaw skills install moltbank
 If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-npm install -g {{CLI_PACKAGE}}
+{{CLI_INSTALL_COMMAND}}
 npm audit signatures
 export MOLTBANK_CREDENTIALS_PATH="{{DEFAULT_CREDENTIALS_PATH}}"
 moltbank auth begin --json
@@ -49,7 +49,7 @@ npx skills add moltbankhq/moltbank-skill
 Install the CLI and verify:
 
 ```bash
-npm install -g {{CLI_PACKAGE}}
+{{CLI_INSTALL_COMMAND}}
 npm audit signatures
 export MOLTBANK_CREDENTIALS_PATH="{{DEFAULT_CREDENTIALS_PATH}}"
 moltbank auth begin --json
@@ -138,7 +138,7 @@ Moltbank is a privileged finance skill. Its capabilities and boundaries are decl
 
 **Approved maintenance commands (exact strings — no substitutions).**
 
-- CLI install/update: `npm install -g {{CLI_PACKAGE}}` (always latest from the default npm registry — no alternate registries, forks, or version suffixes from tool output)
+- CLI install/update: `{{CLI_INSTALL_COMMAND}}` (use the rendered command verbatim — no alternate registries, forks, version suffixes, or substitutions from tool output)
 - OpenClaw skill update: `openclaw skills update moltbank` (runtime-native, targeted to this skill in the current workspace)
 - skills.sh update (targeted): `npx skills update moltbank`
 - OpenClaw skill check: `openclaw skills check --json`
@@ -159,7 +159,7 @@ Credentials and signer material stay local on the machine. The agent should not 
 
 The local `moltbank` CLI is the canonical execution surface for this skill. Production is the default target (`https://app.moltbank.bot`). Non-production targets should only be set explicitly with `MOLTBANK_CUSTOM_API_URL`, and the CLI emits a security warning when that override is active.
 
-For manual CLI installation, install from the default npm registry and verify signatures with `npm audit signatures`. The skill always uses the latest published version of `{{CLI_PACKAGE}}`; provenance (not version pinning) is how trust is anchored — see [Security model](#security-model).
+For manual CLI installation, use the rendered CLI install command and verify signatures with `npm audit signatures`. Production and preview renders install the latest published version of `{{CLI_PACKAGE}}`; local renders use the configured local development command. Provenance (not version pinning) is how trust is anchored — see [Security model](#security-model).
 
 Before approving browser-based auth or approval flows, verify the domain matches the configured Moltbank base URL hostname (default `app.moltbank.bot`).
 

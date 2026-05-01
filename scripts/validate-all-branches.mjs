@@ -20,7 +20,7 @@ const ROOT = path.resolve(__dirname, "..");
 // README.md reflect this branch's render at commit time. If you add
 // new managed branches, update this list AND BRANCH_CONFIG in the
 // render/check scripts.
-const MANAGED_BRANCHES = ["main", "preview", "preview-multiagent"];
+const MANAGED_BRANCHES = ["main", "preview", "local", "preview-multiagent"];
 
 // Default merge target restored at the end (so committed files don't
 // silently switch on the developer running this script). Override via

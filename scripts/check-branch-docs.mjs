@@ -23,6 +23,15 @@ const BRANCH_CONFIG = {
     DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
     AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
   },
+  local: {
+    CLI_PACKAGE: "@moltbankhq/cli",
+    CLI_INSTALL_COMMAND: `cd ${process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-npm"} && npm install && npm run dev:link-mods`,
+    HOMEPAGE_URL: process.env.MOLTBANK_CUSTOM_API_URL ?? "http://localhost:3000",
+    AUTH_HOSTNAME: process.env.MOLTBANK_CUSTOM_API_URL ? new URL(process.env.MOLTBANK_CUSTOM_API_URL).hostname : "localhost",
+    HOME_DIR_NAME: ".moltbank-test",
+    DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
+    AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
+  },
   "preview-multiagent": {
     CLI_PACKAGE: "@megalinker/mbcli",
     CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
