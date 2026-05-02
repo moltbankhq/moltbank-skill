@@ -127,6 +127,31 @@ Before any Polymarket order-creation command (for example `moltbank polymarket c
 
 Do not place Polymarket orders directly from an inferred market or inferred order type.
 
+## Polymarket Signer Balances and Fund Recovery
+
+Before any withdrawal from the Polymarket signer wallet back to the Safe, run:
+
+```
+moltbank polymarket balances --org <O> --account <A> --json
+```
+
+This returns `pol` (Polygon gas), `usdce` (USDC.e bridged pre-trade), and `pusd` (pUSD post-trade collateral) for the registered signer. Use the output to determine which token to withdraw.
+
+### Withdrawing funds from the signer
+
+Withdrawal workflow is strict: before any `polymarket signer-to-safe`, first run `moltbank polymarket balances --org <O> --account <A> --json` and show the current POL, USDC.e, and pUSD balances to the user. Then ask which token they want to withdraw. Do not execute `signer-to-safe` until the user confirms the token in the current turn.
+
+`moltbank polymarket signer-to-safe` requires an explicit `--token` flag. Choose based on signer balance:
+
+- `--token usdce` — use when the signer holds USDC.e (funds were bridged but no trade has settled yet).
+- `--token pusd` — use when the signer holds pUSD (funds are in the Polymarket exchange after a settled trade).
+
+Do not guess which token to use. Always run `polymarket balances` first and select the token with a non-zero balance.
+
+### Token lifecycle
+
+Funds flow as: Safe (USDC on Base) → LI.FI bridge → signer (USDC.e on Polygon) → Polymarket wraps to pUSD at order settlement. If a trade has never settled, the signer holds USDC.e, not pUSD. If a trade settled and the position was closed, the signer holds pUSD.
+
 ## Account Identity Resolution
 
 For any account-scoped action that needs a sender or Safe address:
@@ -262,8 +287,8 @@ When the user wants to buy, sell, launch, or claim creator fees for a Solana mem
 
 CLI surface:
 
-* `moltbank pumpfun buy --org <O> --account <A> --mint <token-mint> --amount <n> --denominated-in-sol true|false --slippage <pct> --pool <route> --json`
-* `moltbank pumpfun sell --org <O> --account <A> --mint <token-mint> --amount <n|"100%"> --denominated-in-sol true|false --slippage <pct> --pool <route> --json`
+* `moltbank pumpfun buy --org <O> --account <A> --mint <token-mint> --amount <n> --denomination sol|usdc|token --slippage <pct> --pool <route> --json`
+* `moltbank pumpfun sell --org <O> --account <A> --mint <token-mint> --amount <n|"100%"> --denomination sol|usdc|token --slippage <pct> --pool <route> --json`
 * `moltbank pumpfun create --token-name <Name> --token-symbol <SYM> --image <local-path> [--token-description <txt> --token-twitter <url> --token-telegram <url> --token-website <url>] --amount <SOL-dev-buy> --slippage <pct> --json` — Pump.fun launch + first dev buy. The CLI reads the image from disk, asks Moltbank to pin both image and metadata JSON to IPFS, and forwards the resulting metadata URI to PumpPortal. Power users with already-pinned metadata can pass `--token-uri <https://...>` instead of `--image`.
 * `moltbank pumpfun claim --json` (claims all accumulated Pump.fun creator fees)
 * `moltbank pumpfun watch [--new-tokens] [--migrations] [--token-trades <mint>]... [--account-trades <pubkey>]... [--duration <secs> | --follow] --json` — read-only Pump.fun / Bonk live data. `--duration` (default 30s) collects events and emits a single JSON object; `--follow` streams NDJSON until SIGINT, one event per line. No credentials needed — the underlying socket is public.
@@ -272,12 +297,14 @@ Pool selects the underlying route: `pump` (default for buy/sell), `bonk` (LetsBo
 
 Operating rules:
 
-1. The agent's auto-$50 default budget already includes the Pump.fun USDC→SOL LI.FI pre-auth, so a fresh agent can run `pumpfun buy` immediately as long as the registered Solana wallet has enough SOL for `priorityFee` plus a small buffer. If the bot needs more SOL, the user can call `moltbank fund_pumpfun_wallet_sol` (via `moltbank mcp call`) to top it up from Safe USDC through LI.FI.
+1. The agent's auto-$50 default budget already includes the Pump.fun USDC→SOL LI.FI pre-auth, so a fresh agent can run `pumpfun buy` immediately as long as the registered Solana wallet has enough SOL for `priorityFee` plus a small buffer. If the bot needs more SOL, run `moltbank pumpfun fund-sol --org <O> --account <A> --amount <usdc> --json` to top it up from Safe USDC through LI.FI.
 2. Do NOT manually orchestrate Solana signer init, wallet registration, transaction signing, RPC submission, or receipt logging — every `pumpfun` subcommand handles all of that and attaches the AP2 IntentStructured for audit-v2.
 3. Validate `--mint` (base58) and any URL the user supplies (`--token-uri`, `--token-twitter`, `--token-telegram`, `--token-website` — all `http(s)`). For `--image`, accept only png / jpg / jpeg / webp / gif and reject anything over 4 MiB before invoking the command. The CLI rejects out-of-range inputs server-side too, but failing fast saves a round trip.
 4. When trades fail with `PUMPFUN_BUILD_FAILED`, `PUMPFUN_RPC_SEND_FAILED`, or `PUMPFUN_SIGNER_MISMATCH`, surface the structured error verbatim and stop. Do not retry blindly; ask the user how to proceed.
 5. If the user wants a different Solana RPC, pass `--solana-rpc-url <https://...>` or set `MOLTBANK_SOLANA_RPC_URL` once for the session. The default public RPC works for smoke tests but is rate-limited.
 6. For `pumpfun watch --follow`, the command runs until SIGINT — emit a brief explanation to the user before starting and run it as a background-friendly invocation rather than a chat-blocking one. For one-shot snapshots, prefer `--duration <seconds>` so the command exits cleanly with a single JSON payload.
+7. Sell workflow is strict: before any `pumpfun sell`, first run `moltbank pumpfun balances --json` and show the current SOL + token balances. Then explicitly ask the user which token/mint they want to sell. Do not execute `pumpfun sell` until the mint is confirmed by the user in the current turn.
+8. `--denomination` controls what unit `--amount` is expressed in: `sol` (SOL already in the signer wallet), `usdc` (USDC bridged from Safe via LI.FI — CLI funds automatically then trades), or `token` (direct token amount for sells). When the user says "buy X USDC of token Y", use `--denomination usdc`: the CLI bridges that USDC to SOL via LI.FI, waits for arrival, and executes the buy using the received SOL. Never ask the user to convert USDC to SOL manually — just confirm the amount, denomination, and mint before running.
 
 ## Budget Proposals (Important)
 
