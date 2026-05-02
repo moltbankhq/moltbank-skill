@@ -84,7 +84,7 @@ When starting a new conversation session where you need to interact with Moltban
    c. Show the URL and code to the user; tell them to verify the domain is `localhost` before opening it.
    d. Run `export MOLTBANK_CREDENTIALS_PATH="<credentialsPath from step b output>"` in the session shell.
    e. Ask the user to approve in the browser and reply `done`.
-   f. Run `moltbank auth poll --session-id "<session_id>" --intent-title "<short audit title>" --purpose "<one-line reason>" --json` to finalize auth, create/reuse local EVM + Solana signers, and register backend wallets.
+   f. Run `moltbank auth poll --session-id "<session_id>" --json` to finalize auth, create/reuse local EVM + Solana signers, register backend wallets, and attach the CLI's default activation audit intent.
 
 To rename an agent later, run `moltbank agent rename --name "<new name>" --json`. The same display name can also be edited from the agent's page in the Moltbank UI.
 5. **Isolate (CRITICAL):** Once the profile is selected or created, `credentialsPath` is now fixed for this session.
@@ -112,7 +112,7 @@ Moltbank's audit log groups multi-step workflows by linking child intents to a p
 
 Operating rules:
 
-1. Declared write intents require both `--intent-title "<short title>"` (3-75 chars) and `--purpose "<one-line description>"`. Keep the title table-friendly and put the fuller reason in `--purpose`.
+1. Declared write intents require both `--intent-title "<short title>"` (3-75 chars) and `--purpose "<audit description>"`. Keep the title table-friendly and put the fuller reason in `--purpose`.
 2. For multi-step plans, open one root parent first: `moltbank workflow open --org "<Org>" --intent-kind <KIND> --intent-title "<title>" --purpose "<description>" --json`. Export the returned `MOLTBANK_PARENT_INTENT_ID` and keep it fixed for the rest of that workflow.
 3. With `MOLTBANK_PARENT_INTENT_ID` set, the CLI threads the parent through write intents and through backend auto intents for read-only MCP calls. You can also pass `--parent-intent-id <uuid>` explicitly when you need to override the env var.
 4. Close the root when the job ends: `moltbank workflow close --status succeeded --json` or `moltbank workflow close --status failed --json`.
@@ -304,7 +304,7 @@ Runtime isolation rule:
 6. If CLI is missing and the user explicitly approves setup, install the CLI:
 
    * `cd ../openclaw-npm && npm install && npm run dev:link-mods`
-7. Continue auth flow for the selected session profile with the single resumable agent path: `moltbank auth begin --name "<Display Name>" --json`, then after browser approval run `moltbank auth poll --session-id "<id>" --intent-title "<title>" --purpose "<reason>" --json`. The final poll always creates/reuses local signers and registers backend wallets.
+7. Continue auth flow for the selected session profile with the single resumable agent path: `moltbank auth begin --name "<Display Name>" --json`, then after browser approval run `moltbank auth poll --session-id "<id>" --json`. The final poll always creates/reuses local signers, registers backend wallets, and uses the CLI's default activation audit intent.
 8. Verify final state with `moltbank whoami --json`.
 9. If you run `moltbank doctor --json` and it fails, report exact failing checks; do not claim "all good".
 10. During setup, treat local signer creation and backend wallet registration as part of activation. Do not run separate wallet registration commands unless recovery is needed.
@@ -320,7 +320,7 @@ If credentials are missing or unauthorized, prefer completing login through chat
 Use one path for agent activation:
 
 - **`moltbank auth begin --name "<Display Name>" --json`** — starts the resumable browser approval flow, returns URL/code/session id, and pre-stages local EVM + Solana signer addresses for activation.
-- **`moltbank auth poll --session-id "<id>" --intent-title "<title>" --purpose "<reason>" --json`** — run only after the user says approval is done. It finalizes auth, creates any missing local signers, reuses existing signers when present, registers backend EVM + Solana wallets, and returns the ready profile.
+- **`moltbank auth poll --session-id "<id>" --json`** — run only after the user says approval is done. It finalizes auth, creates any missing local signers, reuses existing signers when present, registers backend EVM + Solana wallets, records the default activation audit intent, and returns the ready profile.
 
 Do not use `agent setup*`; activation has exactly one supported CLI path.
 
@@ -330,7 +330,7 @@ Do not use `agent setup*`; activation has exactly one supported CLI path.
 2. Extract `verification_uri_complete` and `user_code` from the JSON output. The CLI rejects any malformed or off-host URL before returning, so a JSON success exit means the URL is safe to show. Tell the user to verify the domain is `localhost` before opening it.
 3. Set `MOLTBANK_CREDENTIALS_PATH` in the session shell to the `credentialsPath` returned in step 1, so subsequent commands hit the right per-agent profile.
 4. Ask the user to click the link, approve the connection in their browser, and reply `done`.
-5. When the user replies `done`, run `moltbank auth poll --session-id "<session_id>" --intent-title "<short audit title>" --purpose "<one-line reason>" --json`. Use user-authored audit text; do not fabricate a purpose.
+5. When the user replies `done`, run `moltbank auth poll --session-id "<session_id>" --json`. Do not ask the user for an activation title or purpose; the CLI generates the canonical activation audit text automatically.
 6. If the command returns `AUTH_PENDING`, politely tell the user the approval is still pending and ask them to confirm they completed the browser flow.
 7. If the command succeeds, continue with the user's original request.
 
@@ -342,7 +342,7 @@ Never execute long-running interactive authentication wrappers as an agent tool.
 
 1. Confirm `auth poll` returned `botWalletRegistered: true`, `solanaWalletRegistered: true`, `agentId`, and `organization`.
 2. Run `moltbank doctor --json`; if it fails, report exact failing checks.
-3. If `auth poll` returns `AUTH_PENDING`, tell the user approval is still pending. If it returns `INVALID_INPUT` for missing `--intent-title` or `--purpose`, retry once with user-authored audit text.
+3. If `auth poll` returns `AUTH_PENDING`, tell the user approval is still pending. If it returns `INVALID_INPUT`, report the exact error; do not ask the user for activation title/purpose unless the CLI explicitly requests custom audit text.
 
 ## x402 Payments
 
