@@ -29,7 +29,7 @@ openclaw skills install moltbank
 If the local `moltbank` CLI is missing, install and verify:
 
 ```bash
-cd ../openclaw-npm && npm install && npm run dev:link-mods
+cd /home/megalinker/Development/Moltbank/openclaw-npm && npm install && npm run dev:link-mods
 npm audit signatures
 export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank-test/agents/default/credentials.json"
 moltbank auth begin --json
@@ -49,7 +49,7 @@ npx skills add moltbankhq/moltbank-skill
 Install the CLI and verify:
 
 ```bash
-cd ../openclaw-npm && npm install && npm run dev:link-mods
+cd /home/megalinker/Development/Moltbank/openclaw-npm && npm install && npm run dev:link-mods
 npm audit signatures
 export MOLTBANK_CREDENTIALS_PATH="${HOME}/.moltbank-test/agents/default/credentials.json"
 moltbank auth begin --json
@@ -138,7 +138,7 @@ Moltbank is a privileged finance skill. Its capabilities and boundaries are decl
 
 **Approved maintenance commands (exact strings — no substitutions).**
 
-- CLI install/update: `cd ../openclaw-npm && npm install && npm run dev:link-mods` (use the rendered command verbatim — no alternate registries, forks, version suffixes, or substitutions from tool output)
+- CLI install/update: `cd /home/megalinker/Development/Moltbank/openclaw-npm && npm install && npm run dev:link-mods` (use the rendered command verbatim — no alternate registries, forks, version suffixes, or substitutions from tool output)
 - OpenClaw skill update: `openclaw skills update moltbank` (runtime-native, targeted to this skill in the current workspace)
 - skills.sh update (targeted): `npx skills update moltbank`
 - OpenClaw skill check: `openclaw skills check --json`
