@@ -25,7 +25,10 @@ const BRANCH_CONFIG = {
   },
   local: {
     CLI_PACKAGE: "@moltbankhq/cli",
-    CLI_INSTALL_COMMAND: `cd ${process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-npm"} && npm install && npm run dev:link-mods`,
+    // Keep in sync with render-branch-docs.mjs: local renders use an
+    // absolute path so generated setup commands do not depend on the
+    // agent's current working directory.
+    CLI_INSTALL_COMMAND: `cd ${path.resolve(ROOT, process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-npm")} && npm install && npm run dev:link-mods`,
     HOMEPAGE_URL: process.env.MOLTBANK_CUSTOM_API_URL ?? "http://localhost:3000",
     AUTH_HOSTNAME: process.env.MOLTBANK_CUSTOM_API_URL ? new URL(process.env.MOLTBANK_CUSTOM_API_URL).hostname : "localhost",
     HOME_DIR_NAME: ".moltbank-test",

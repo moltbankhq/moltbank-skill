@@ -30,9 +30,11 @@ We aim to acknowledge reports within 3 business days and to provide an initial a
 
 - Remote code execution, command injection, or arbitrary install paths triggered through the skill's update or setup flows
 - Prompt-injection paths that cause the agent to execute unapproved install/update commands, bypass domain validation, or move funds without explicit user approval
+- Prompt-injection paths in mod `SKILL.md`, README, manifest, badge, or registry Markdown that cause the agent to bypass the root skill's credential isolation, approval, provenance, or command-source rules
 - Authentication bypass, token exfiltration, or credential leakage from the local `moltbank` CLI
 - x402 or payment flows that can execute without explicit user approval
 - Provenance or supply-chain issues affecting `@moltbankhq/cli` releases
+- Mod install/remove/update paths that bypass Moltbank tier, signature, revocation, permission, or explicit community-acknowledgement gates
 
 ## Out of scope
 
