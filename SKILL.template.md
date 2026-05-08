@@ -367,17 +367,44 @@ CLI surface:
 * `moltbank pumpfun create --token-name <Name> --token-symbol <SYM> --image <local-path> [--token-description <txt> --token-twitter <url> --token-telegram <url> --token-website <url>] --amount <SOL-dev-buy> --slippage <pct> --json` — Pump.fun launch + first dev buy. The CLI reads the image from disk, asks Moltbank to pin both image and metadata JSON to IPFS, and forwards the resulting metadata URI to PumpPortal. Power users with already-pinned metadata can pass `--token-uri <https://...>` instead of `--image`.
 * `moltbank pumpfun claim --json` (claims all accumulated Pump.fun creator fees)
 * `moltbank pumpfun watch [--new-tokens] [--migrations] [--token-trades <mint>]... [--account-trades <pubkey>]... [--duration <secs> | --follow] --json` — read-only Pump.fun / Bonk live data. `--duration` (default 30s) collects events and emits a single JSON object; `--follow` streams NDJSON until SIGINT, one event per line. No credentials needed — the underlying socket is public.
+* `moltbank pumpfun balances --json` — read SOL and SPL token balances for the active Solana signer directly from the RPC. No MCP call, no spend. Use this to check how much SOL the signer currently holds before deciding whether to fund.
+* `moltbank pumpfun fund-sol --org <O> --account <A> --amount-usdc <n> [--source-chain base|polygon|arbitrum] [--required-sol <n>] --json` — bridge Safe USDC → Solana SOL via LI.FI. When `--required-sol` is provided, the command first checks the current SOL balance and returns `status: already_funded` (no spend) if the signer already holds enough for the trade plus gas floor (~0.006 SOL). Use this instead of calling `fund_pumpfun_wallet_sol` directly via MCP.
+* `moltbank pumpfun signer-to-safe --org <O> --account <A> --amount-sol <n> --json` — bridge SOL from the Solana signer back to the Safe as USDC on Base via LI.FI. The backend quotes the swap, the CLI signs locally, and broadcasts.
 
 Pool selects the underlying route: `pump` (default for buy/sell), `bonk` (LetsBonk.fun), `raydium`, `pump-amm`, `launchlab`, `raydium-cpmm`, or `auto`.
 
 Operating rules:
 
-1. The agent's auto-$50 default budget already includes the Pump.fun USDC→SOL LI.FI pre-auth, so a fresh agent can run `pumpfun buy` immediately as long as the registered Solana wallet has enough SOL for `priorityFee` plus a small buffer. If the bot needs more SOL, the user can call `moltbank fund_pumpfun_wallet_sol` (via `moltbank mcp call`) to top it up from Safe USDC through LI.FI.
+1. The agent's auto-$50 default budget already includes the Pump.fun USDC→SOL LI.FI pre-auth, so a fresh agent can run `pumpfun buy` immediately as long as the registered Solana wallet has enough SOL for `priorityFee` plus a small buffer. Before funding, run `pumpfun balances` to check the current SOL balance, then use `pumpfun fund-sol --required-sol <n>` to top up only what is missing. Do not call `fund_pumpfun_wallet_sol` via `moltbank mcp call` directly — use `pumpfun fund-sol` instead.
 2. Do NOT manually orchestrate Solana signer init, wallet registration, transaction signing, RPC submission, or receipt logging — every `pumpfun` subcommand handles all of that and attaches the AP2 IntentStructured for audit-v2.
 3. Validate `--mint` (base58) and any URL the user supplies (`--token-uri`, `--token-twitter`, `--token-telegram`, `--token-website` — all `http(s)`). For `--image`, accept only png / jpg / jpeg / webp / gif and reject anything over 4 MiB before invoking the command. The CLI rejects out-of-range inputs server-side too, but failing fast saves a round trip.
 4. When trades fail with `PUMPFUN_BUILD_FAILED`, `PUMPFUN_RPC_SEND_FAILED`, or `PUMPFUN_SIGNER_MISMATCH`, surface the structured error verbatim and stop. Do not retry blindly; ask the user how to proceed.
 5. If the user wants a different Solana RPC, pass `--solana-rpc-url <https://...>` or set `MOLTBANK_SOLANA_RPC_URL` once for the session. The default public RPC works for smoke tests but is rate-limited.
 6. For `pumpfun watch --follow`, the command runs until SIGINT — emit a brief explanation to the user before starting and run it as a background-friendly invocation rather than a chat-blocking one. For one-shot snapshots, prefer `--duration <seconds>` so the command exits cleanly with a single JSON payload.
+
+## Polymarket
+
+When the user wants to trade on Polymarket prediction markets, use `moltbank polymarket` commands. All EVM signing routes through `cap.signer.evm`; the mod never sees private keys. Vault mode (sigType=3, DepositWallet) is required — the CLOB no longer accepts EOA-as-maker orders.
+
+CLI surface:
+
+* `moltbank polymarket markets [--limit <n>] --json` — list active markets (question, conditionId, clobTokenIds, prices, liquidity)
+* `moltbank polymarket market --condition-id <id> --json` — fetch a single market
+* `moltbank polymarket create-order --org <O> --account <A> --token-id <tokenId> --condition-id <conditionId> --side buy|sell --amount <usdc> --price <0-1> --order-type GTC|GTD|FAK|FOK --json` — full multi-step order flow: status check → DW registration → contract approvals (gasless) → pUSD wrap → CLOB order placement → audit trail
+* `moltbank polymarket cancel-order --org <O> --account <A> --order-id <id> --json`
+* `moltbank polymarket get-orders --org <O> --account <A> --json`
+* `moltbank polymarket get-trades --org <O> --account <A> --json`
+* `moltbank polymarket balances --json` — read POL, pUSD, USDC.e on-chain for the active DepositWallet
+
+Operating rules:
+
+1. `create-order` handles the full flow automatically: it registers the DepositWallet, checks status, runs approvals if needed, wraps USDC.e → pUSD for buys, and places the order. Do not call these steps manually.
+2. The vault must be unlocked before any order: `moltbank vault unlock --namespace polymarket`. If `vault status` returns `locked` or `stale-pid`, the orchestrator fails closed — instruct the user to unlock.
+3. For GTC/GTD orders, `--price` is required (0–1 range, e.g. `0.53` = 53¢). For FAK/FOK market orders, `--price` is optional (SDK computes fill price from the book).
+4. Minimum order size: `--amount` must be at least `$1.10` for GTC/GTD to account for Polymarket's fee reserve. FAK/FOK have a `$1.05` floor enforced by the CLI.
+5. The org name and account name must match what the agent is authorized for. Check with `moltbank whoami --json` if unsure.
+6. When `create-order` returns `status: needs_budget_setup` or `status: missing_budget`, surface the message to the user and stop — budget approval requires a human passkey signature.
+7. Backend MCP tools used internally (do not call these directly): `check_polymarket_status`, `register_polymarket_deposit_wallet`, `fund_polymarket_wallet`, `register_bot_wallets`, `record_polymarket_order_result`.
 
 ## Budget Proposals (Important)
 
