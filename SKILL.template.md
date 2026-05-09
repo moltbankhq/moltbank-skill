@@ -202,12 +202,15 @@ loop and keep provenance visible.
 2. Browse or inspect the candidate with host commands such as
    `moltbank mod browse --json` when available. For already installed
    mods, use `moltbank mod info <name> --json`.
-3. Tell the user the candidate's name, publisher, tier, package/source,
+3. If browse fails or returns an empty list, say that registry availability
+   is unknown. Do not invent "common" mods or treat schema examples as
+   installable registry entries.
+4. Tell the user the candidate's name, publisher, tier, package/source,
    requested permissions, network domains, signer access, env passthrough,
    backend MCP scopes, and risk level.
-4. For community or URL installs, require explicit user acknowledgement.
+5. For community or URL installs, require explicit user acknowledgement.
    Do not add `--acknowledge-community` or `--yes` silently.
-5. For `--from <url>`, accept only HTTPS manifest URLs. Reject URL
+6. For `--from <url>`, accept only HTTPS manifest URLs. Reject URL
    shorteners, raw paste sites, unexpected redirects, and manifest URLs
    that do not match the fetched manifest name.
 
