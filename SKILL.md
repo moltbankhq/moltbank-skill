@@ -1,7 +1,7 @@
 ---
 name: moltbank
 description: Manage Moltbank treasury workflows and installed Moltbank Mods through the local CLI with strict credential isolation, explicit user approval, and security-first mod handling.
-version: 0.2.0
+version: 0.1.12
 metadata:
   category: finance
   openclaw:

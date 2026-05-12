@@ -1,6 +1,6 @@
 {
   "name": "moltbank",
-  "version": "0.2.0",
+  "version": "0.1.12",
   "description": "Moltbank skill with CLI-first treasury guidance plus security-first generic operating rules for installing, inspecting, running, updating, and removing Moltbank Mods.",
   "homepage": "https://app.moltbank.bot",
   "entrypoint": "SKILL.md",
