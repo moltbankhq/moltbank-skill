@@ -23,6 +23,18 @@ const BRANCH_CONFIG = {
     DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
     AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
   },
+  local: {
+    CLI_PACKAGE: "@moltbankhq/cli",
+    // Keep in sync with render-branch-docs.mjs: local renders use an
+    // absolute path so generated setup commands do not depend on the
+    // agent's current working directory.
+    CLI_INSTALL_COMMAND: `cd ${path.resolve(ROOT, process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-npm")} && npm install && npm run dev:link-mods`,
+    HOMEPAGE_URL: process.env.MOLTBANK_CUSTOM_API_URL ?? "http://localhost:3000",
+    AUTH_HOSTNAME: process.env.MOLTBANK_CUSTOM_API_URL ? new URL(process.env.MOLTBANK_CUSTOM_API_URL).hostname : "localhost",
+    HOME_DIR_NAME: ".moltbank-test",
+    DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
+    AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
+  },
   "preview-multiagent": {
     CLI_PACKAGE: "@megalinker/mbcli",
     CLI_INSTALL_COMMAND: "npm install -g @megalinker/mbcli",
@@ -38,6 +50,11 @@ const FILE_MAP = [
   ["README.template.md", "README.md"],
   ["SKILL.template.md", "SKILL.md"],
 ];
+
+// See render-branch-docs.mjs for the rationale. Must be kept in sync.
+const RUNTIME_TEMPLATE_TOKENS = new Set([
+  "INSTALLED_MODS_LIST",
+]);
 
 function getBranch() {
   if (process.env.TARGET_BRANCH) return process.env.TARGET_BRANCH;
@@ -61,7 +78,8 @@ function getBranch() {
 }
 
 function renderTemplate(template, vars) {
-  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, key) => {
+  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => {
+    if (RUNTIME_TEMPLATE_TOKENS.has(key)) return match;
     if (!(key in vars)) {
       throw new Error(`Missing template variable: ${key}`);
     }

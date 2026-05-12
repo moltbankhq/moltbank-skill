@@ -25,9 +25,14 @@ const BRANCH_CONFIG = {
   },
   local: {
     CLI_PACKAGE: "@moltbankhq/cli",
-    CLI_INSTALL_COMMAND: `cd ${process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-plugin"} && npm install && npm link`,
-    HOMEPAGE_URL: process.env.MOLTBANK_CUSTOM_API_URL ?? "https://localtest.app.moltbank.bot",
-    AUTH_HOSTNAME: process.env.MOLTBANK_CUSTOM_API_URL ? new URL(process.env.MOLTBANK_CUSTOM_API_URL).hostname : "localtest.app.moltbank.bot",
+    // Resolve to an ABSOLUTE path at render time so the install command
+    // works no matter what cwd the agent invokes it from. Position-
+    // dependent `cd ../openclaw-npm` worked only when the caller was
+    // already in `moltbank-skill/`; agents in `/tmp/<workdir>/` got
+    // "No such directory" errors.
+    CLI_INSTALL_COMMAND: `cd ${path.resolve(ROOT, process.env.LOCAL_OPENCLAW_PATH ?? "../openclaw-npm")} && npm install && npm run dev:link-mods`,
+    HOMEPAGE_URL: process.env.MOLTBANK_CUSTOM_API_URL ?? "http://localhost:3000",
+    AUTH_HOSTNAME: process.env.MOLTBANK_CUSTOM_API_URL ? new URL(process.env.MOLTBANK_CUSTOM_API_URL).hostname : "localhost",
     HOME_DIR_NAME: ".moltbank-test",
     DEFAULT_CREDENTIALS_PATH: "${HOME}/.moltbank-test/agents/default/credentials.json",
     AGENT_CREDENTIALS_PATH_TEMPLATE: "~/.moltbank-test/agents/<name>/credentials.json",
@@ -47,6 +52,14 @@ const FILE_MAP = [
   ["README.template.md", "README.md"],
   ["SKILL.template.md", "SKILL.md"],
 ];
+
+// Tokens filled by the agent runtime / host CLI at agent-load time, NOT by
+// branch-config render. They survive `renderTemplate` unchanged. The agent
+// harness substitutes them via `moltbank mod ls --json --skill-format` or
+// equivalent before showing the SKILL.md to the model.
+const RUNTIME_TEMPLATE_TOKENS = new Set([
+  "INSTALLED_MODS_LIST",
+]);
 
 function getBranch() {
   if (process.env.TARGET_BRANCH) return process.env.TARGET_BRANCH;
@@ -69,7 +82,12 @@ function getBranch() {
 }
 
 function renderTemplate(template, vars) {
-  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, key) => {
+  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (match, key) => {
+    if (RUNTIME_TEMPLATE_TOKENS.has(key)) {
+      // Runtime token — survives the render unchanged so the agent harness
+      // can fill it in at session load time.
+      return match;
+    }
     if (!(key in vars)) {
       throw new Error(`Missing template variable: ${key}`);
     }
